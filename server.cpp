@@ -11,7 +11,7 @@ struct{
 
 
 struct msg{
-    
+
     int from;
     string s;
     time_t sendingTime;
@@ -20,7 +20,7 @@ struct msg{
 
 int main(){
 
-
+    
 
 
     return 0;
