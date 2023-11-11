@@ -8,7 +8,11 @@ We will implement a multithreaded server that handles broadcasting the messages.
 
 
 ### Client side:
-The client side
+The client side takes care of sending and receiving messages.
+Types of messages to send:
+- 
+- 
+
 
 
 
