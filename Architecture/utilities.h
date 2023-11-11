@@ -122,13 +122,20 @@ public:
     Client();
 
     /**
-     * @brief connects.
+     * @brief Intializes a connection between the client and the specific server.
      * Requires IP-Port-Protocol
      *
-     * @return true
-     * @return false
+     * @return true if connection is established
+     * @return false else
      */
     bool connect();
-    bool send_message();
+    /**
+     * @brief Sends message encapsulated in a request object to the server.
+     *
+     * @return true if message is sent & received
+     * @return false else
+     */
+    bool send_message(string message);
+
     bool create_chat_room();
 };
