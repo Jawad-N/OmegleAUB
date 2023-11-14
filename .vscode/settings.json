@@ -2,6 +2,7 @@
     "git-blame.gitWebUrl": "",
     "C_Cpp.errorSquiggles": "disabled",
     "files.associations": {
+<<<<<<< HEAD
         "*.embeddedhtml": "html",
         "random": "cpp",
         "bitset": "cpp",
@@ -18,5 +19,9 @@
         "valarray": "cpp",
         "iostream": "cpp",
         "iosfwd": "cpp"
+=======
+        "random": "cpp",
+        "thread": "cpp"
+>>>>>>> 5cabf0ac2cb062547ec9f5a7b769d363c5af5efc
     }
 }
