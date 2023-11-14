@@ -50,6 +50,19 @@ Types of replies to receive:
 - reply_handler class:
     - handle_reply(); // handels the reply message
 
+- chatRoom class:
+    - int ID; // ID of the chatRoom class
+    - vector int client_IDs;
+    - string name;        // name of the chatroom
+    - string description; // decription of the chatroom
+
+
+
+
+- Socket class:
+    - 
+
+
 - client class:
     - socket connection;
     - int ID;
@@ -60,14 +73,12 @@ Types of replies to receive:
     - bool send() ;     // For sending message
     - bool create_CR(); // For creating a CR
 
-- chatRoom class:
-    - int ID; // ID of the chatRoom class
-    - vector int client_IDs;
-    - string name;        // name of the chatroom
-    - string description; // decription of the chatroom
 
 
-# TO-DO
+
+#### TO-DO
+
+Add error reporting class.
 
 ## Frontend : 
 - TBA 

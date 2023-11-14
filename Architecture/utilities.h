@@ -1,5 +1,6 @@
 
 #include <bits/stdc++.h>
+#include <ctime>
 using namespace std;
 
 /**
@@ -10,8 +11,16 @@ class Message
 {
 private:
     int from;           // ID of sender of message.Change its type later ?
-    string s;           // Actual message sent.
+    string content;     // Actual message sent.
     time_t sendingTime; // Timestamp of sending.
+
+public:
+    int getFrom();
+    string getContent();
+    time_t getsendingTime();
+    Message(string content, int from, time_t sendingTime);
+    Message();
+    friend std::ostream &operator<<(std::ostream &os, const Message &Mess);
 };
 
 /**
@@ -23,6 +32,9 @@ enum requestTYPE
     BROADCAST_MESS,
     CREATE_CR
 };
+
+// string requestTYPESTR[2] = {"BROADCAST_MESS", "CREATE_CR"};
+
 /**
  * @brief Class that represents the request object to be sent
  * from the client to the server
@@ -33,9 +45,23 @@ class request
 
 private:
     static int counter; //
-    int ID;             // ID of the request
-    requestTYPE type;   // type of request
-    string message;     // message encoded
+    static vector<string> request_type;
+    static map<string, requestTYPE> str_to_request_type;
+    int ID;           // ID of the request
+    requestTYPE type; // type of request
+    Message message;  // message encoded
+public:
+    request(requestTYPE type, Message message);
+    request(int ID, requestTYPE type, Message message);
+    request()
+    {
+    }
+    int getID();
+    requestTYPE getType();
+    string getTypeStr();
+    Message getMessage();
+    static requestTYPE getRequestType(string key);
+    friend std::ostream &operator<<(std::ostream &os, const request &req);
 };
 
 /**
@@ -46,10 +72,23 @@ private:
 class reply
 {
 private:
+    static vector<string> request_type;
     int ID;
     requestTYPE type;
     int status_code;
-    string message;
+    Message message;
+
+public:
+    reply(int ID, requestTYPE type, int status_code, Message message);
+    reply() {}
+
+    int getID();
+    int getStatusCode();
+    requestTYPE getType();
+    string getTypeStr();
+    Message getMessage();
+
+    friend std::ostream &operator<<(std::ostream &os, const reply &rep);
 };
 
 /**
@@ -58,45 +97,55 @@ private:
  */
 class Coder
 {
+private:
 public:
     /**
-     * @brief Encodes the request in a string
+     * @brief Splits content string into vector<string> according to the last k delimeters
      *
+     * @param content
+     * @param delimeter
+     * @param _size_
+     * @return vector<string>
+     */
+    static vector<string> split(string content, char delimeter, int k);
+    /**
+     * @brief Encodes the request in a string
+     * Encoding Scheme: message$type$id
      * @param req
      * @return string
      */
     static string encode_request(request req);
     /**
      * @brief Decodes the message to a request
-     *
+     * Encoding Scheme: message$type$id
      * @param req_str
      * @return request
      */
     static request decode_request(string req_str);
     /**
      * @brief Encodes the reply object to string
-     *
+     * Encoding Scheme: message$type$id$status_code
      * @param rep
      * @return string
      */
     static string encode_reply(reply rep);
     /**
      * @brief Decodes the string to reply object
-     *
+     * Encoding Scheme: message$type$id$status_code
      * @param rep_str
      * @return string
      */
     static reply decode_reply(string rep_str);
     /**
      * @brief Encodes the Message object to string
-     *
+     * Encoding scheme: Message.message|str(from)|str(sendingTime)\0
      * @param mess
      * @return string
      */
     static string encode_message(Message mess);
     /**
-     * @brief Decodes the string to message object
-     *
+     * @brief Decodes the string to message object;
+     * Encoding scheme: Message.message|str(from)|str(sendingTime)\0
      * @param mess_str
      * @return Message
      */
@@ -138,4 +187,18 @@ public:
     bool send_message(string message);
 
     bool create_chat_room();
+};
+
+/**
+ * @brief Class that converts time_t to string and vice versa
+ *
+ */
+class TimeConverter
+{
+public:
+    // Convert time_t to string
+    static std::string timeToString(time_t currentTime);
+
+    // Convert string to time_t
+    static time_t stringToTime(string dateString);
 };

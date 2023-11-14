@@ -2,6 +2,21 @@
     "git-blame.gitWebUrl": "",
     "C_Cpp.errorSquiggles": "disabled",
     "files.associations": {
-        "random": "cpp"
+        "*.embeddedhtml": "html",
+        "random": "cpp",
+        "bitset": "cpp",
+        "chrono": "cpp",
+        "complex": "cpp",
+        "limits": "cpp",
+        "memory": "cpp",
+        "functional": "cpp",
+        "array": "cpp",
+        "string_view": "cpp",
+        "initializer_list": "cpp",
+        "regex": "cpp",
+        "utility": "cpp",
+        "valarray": "cpp",
+        "iostream": "cpp",
+        "iosfwd": "cpp"
     }
 }
