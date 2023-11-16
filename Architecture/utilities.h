@@ -5,7 +5,12 @@ using namespace std;
 
 /**
  * @brief Class that represents the message to be broadcasted.
- *
+ *        Messages content for the following types
+ *        BROADCAST_MESS : text_message | CR_ID
+ *        CREATE_CR      : CR_ID : ChatRoom ID
+ *        JOIN_CR        : CR_ID
+ *        REQUEST_CR     : Empty
+ *        LEAVE_CR       : CR_ID
  */
 class Message
 {
@@ -30,10 +35,11 @@ public:
 enum requestTYPE
 {
     BROADCAST_MESS,
-    CREATE_CR
+    CREATE_CR,
+    JOIN_CR,
+    REQUEST_CR,
+    LEAVE_CR
 };
-
-// string requestTYPESTR[2] = {"BROADCAST_MESS", "CREATE_CR"};
 
 /**
  * @brief Class that represents the request object to be sent
@@ -56,10 +62,36 @@ public:
     request()
     {
     }
+    /**
+     * @brief Returns ID
+     *
+     * @return int
+     */
     int getID();
+    /**
+     * @brief Get the Type object
+     *
+     * @return requestTYPE
+     */
     requestTYPE getType();
+    /**
+     * @brief Returns the type in string representation
+     *
+     * @return string
+     */
     string getTypeStr();
+    /**
+     * @brief Returns a copy of the message
+     *
+     * @return Message
+     */
     Message getMessage();
+    /**
+     * @brief Returns the request type of key. string -> requestType
+     *
+     * @param key
+     * @return requestTYPE
+     */
     static requestTYPE getRequestType(string key);
     friend std::ostream &operator<<(std::ostream &os, const request &req);
 };

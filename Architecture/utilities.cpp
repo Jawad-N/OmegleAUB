@@ -7,10 +7,15 @@
  *                               No We can check for the last k seperators. Won't fail
  *                               Go in reverse order.
  *          - Message.message|str(from)|str(sendingTime)
+ *          - Message.message:
+ *                  - CREATE_CR (CR object)
+ *                  - JOIN_CR   (vector of CR ID numbers)
+ *                  - BROADCAST_MESSAGE ( )
  * Request: - Using seperators:
  *          - message$type$id
  * Reply  : - Using seperators:
  *          - message$type$id$status_code
+ *
  *
  */
 
@@ -18,13 +23,16 @@
 
 vector<string> request::request_type{
     "BROADCAST_MESS",
-    "CREATE_CR"};
+    "CREATE_CR", "JOIN_CR", "REQUEST_CR", "LEAVE_CR"};
 
 int request::counter = 0;
 
 map<string, requestTYPE> request::str_to_request_type{
     {"BROADCAST_MESS", BROADCAST_MESS},
-    {"CREATE_CR", CREATE_CR}};
+    {"CREATE_CR", CREATE_CR},
+    {"JOIN_CR", JOIN_CR},
+    {"REQUEST_CR", REQUEST_CR},
+    {"LEAVE_CR", LEAVE_CR}};
 
 requestTYPE request ::getRequestType(string key)
 {
@@ -89,7 +97,7 @@ std::ostream &operator<<(std::ostream &os, const request &req)
 
 vector<string> reply::request_type{
     "BROADCAST_MESS",
-    "CREATE_CR"};
+    "CREATE_CR", "JOIN_CR", "REQUEST_CR", "LEAVE_CR"};
 
 reply::reply(int ID, requestTYPE type, int status_code, Message message)
 {

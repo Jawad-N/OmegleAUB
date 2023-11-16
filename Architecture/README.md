@@ -21,12 +21,12 @@ Types of replies to receive:
 
 
 #### Structures used (utilities.h):
-- request class:
+- request class: (done)
     - int requestID; // id of the request
     - enum requestType;// {BROADCAST_MESS,CREATE_CR}
     - string message ; // Message to be broadcasted. It is ignored whne requestTYPE = CREATE_CR
 
-- reply class :
+- reply class : (done)
     - int replyID; // id of the request to reply to
     - enum replyType;// {BROADCAST_MESS,CREATE_CR} same as request type
     - int status_code ; // 0 if successful, -1 otherwise
@@ -34,12 +34,12 @@ Types of replies to receive:
 
 
 
-- message class : 
+- message class : (done)
     - int from;           // ID of the sender
     - string s;           // Actual message sent 
     - time_t sendingTime; // Time sent
 
-- encoder class  :
+- encoder class  : (done)
     - static string encode_request(request);  // Used for encoding requests
     - static request decode_request(string); // Used for decoding requests
     - static string encode_reply(request);  // Used for encoding replies
@@ -50,7 +50,7 @@ Types of replies to receive:
 - reply_handler class:
     - handle_reply(); // handels the reply message
 
-- chatRoom class:
+- chatRoom class: ( )
     - int ID; // ID of the chatRoom class
     - vector int client_IDs;
     - string name;        // name of the chatroom
@@ -59,11 +59,11 @@ Types of replies to receive:
 
 
 
-- Socket class:
+- Socket class: ( )
     - 
 
 
-- client class:
+- client class: ( )
     - socket connection;
     - int ID;
     - vector Message log_history;
@@ -76,9 +76,12 @@ Types of replies to receive:
 
 
 
+
 #### TO-DO
 
-Add error reporting class.
+- Add error reporting class (for debugging purposes)
+- Add Socket class.
+- Add chatroom class.
 
 ## Frontend : 
 - TBA 
