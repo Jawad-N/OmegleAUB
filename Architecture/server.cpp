@@ -6,24 +6,45 @@
 #include <unistd.h>
 #include<chrono>
 #include<ctime>
-
+// mutex on the queue of tasks
 using namespace std;
+
+
+
+
+
+
+
+
 
 map<int, vector<int>> CR;
 vector<int> sockets; // sockets are filedescriptors
 
 struct msg{
-
     int to;
     int from;
     string s;
     time_t sendingTime;
-
 };
+
+class request{
+    public:
+
+}
+
+
+class requestConnect : public request{
+    
+}
+
+
+
+
+
 
 // server sending to client
 // first time will send the options then wait for a send 
-void * pickAndListenThread( void * incomingSocket ){ // index will be the address of the incoming request; 
+void * listRoomsTask( void * incomingSocket ){
     incomingSocket = (int *) incomingSocket;
     string choices = "";
     for(pair<int,vector<int>> p: CR){
@@ -39,23 +60,17 @@ void * pickAndListenThread( void * incomingSocket ){ // index will be the addres
     // Manipulate CR according to his joining request;
 
     // Wait until further requests are done
+}
 
-
+void * listenThread( void * incomingSocket ){ // index will be the address of the incoming request; 
 
     while(true){
 
         char buffer[1024] = { 0 };
         ssize_t valread = recv(incomingSocket, buffer, sizeof(buffer), MSG_WAITALL);
         // read msg into buffer, next create threads to send for each of the servers
-        request = decode(buffer);
+        request req = decode(buffer);
         if(request.type)...
-
-        // after decoding
-        // msg will also be decoded
-        for(int i: receivers){
-
-            pthread_create(&thread[id][0], NULL, broadcastThread, message);
-        }
 
 
 
@@ -93,7 +108,8 @@ int main(){
 
 
     CR[0] = {}; // mainRoom
-    pthread_t threads[1000][2];
+    pthread_t threads[1000];
+    pthread_t wThreads[30];
     int offset = 1024;
 
     while(true){
@@ -112,7 +128,7 @@ int main(){
             exit(EXIT_FAILURE);
         }
         //Giving the socket the capacity to listent to incoming communication
-        if( listen(serverSocket,3) < 0 ){
+        if( listen(serverSocket,3) < 0 ){ // check if 3 is the capacity - understanding 3 is the queue size on this step (before acc)
             //handling potential error
             perror(" listen failed ");
             exit(EXIT_FAILURE); 
@@ -120,7 +136,7 @@ int main(){
         int incoming;
         //Taking in requests, if one arrives before accept then it queues up and accept does not block
         //Otherwise accept blocks and waits until a connect request occurs
-        if( incoming = accept(serverSocket, (struct sockaddr*)& serverAddress, &addrlen) < 0 ){
+        if( (incoming = accept(serverSocket, (struct sockaddr*)& serverAddress, &addrlen)) < 0 ){
             //handling potential error
             perror(" accept failed ")
             exit(EXIT_FAILURE);
@@ -130,13 +146,12 @@ int main(){
         // accepted incoming request, connecting it to a thread
 
         int valread = recv( incoming, buffer, 1024-1, 0); //reading into buffer
-        //decoding and get id;
-
+        // decoding, get id and name and then establish connection
+        // add to map containing id to name
         // creating two threads for two operations
         // first replies to the user with a list of ChatRooms
         // the other listens to broadcast requests from user to some ChatRoom that he plays part in
-        pthread_create( &thread[id][1], NULL, pickAndListenThread, &incoming );
-
+        pthread_create( &thread[id], NULL, listenThread, &incoming );
     
         // make a reply containing chat rooms available
         // available rooms sent
