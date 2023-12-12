@@ -1,4 +1,4 @@
-#include<bits/stdc++.h>
+#include <bits/stdc++.h>
 #include <netinet/in.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -6,7 +6,7 @@
 #include <unistd.h>
 #include<chrono>
 #include<ctime>
-// mutex on the queue of tasks
+
 using namespace std;
 
 
@@ -21,6 +21,7 @@ map<int, vector<int>> CR;
 vector<int> sockets; // sockets are filedescriptors
 
 struct msg{
+
     int to;
     int from;
     string s;
@@ -44,15 +45,16 @@ class requestConnect : public request{
 
 // server sending to client
 // first time will send the options then wait for a send 
-void * listRoomsTask( void * incomingSocket ){
+void * pickAndListenThread( void * incomingSocket ){ // index will be the address of the incoming request; 
     incomingSocket = (int *) incomingSocket;
     string choices = "";
-    for(pair<int,vector<int>> p: CR){
+    for (pair<int, vector<int>> p : CR)
+    {
         choices += str(p.first) + " ";
     }
-    send( *incomingSocket, choices, choices.size(), 0);
-    char* buffer[1024] = { 0 };
-    ssize_t bytes_received = recv( *(incomingSocket), buffer, sizeof(buffer), MSG_WAITALL);
+    send(*incomingSocket, choices, choices.size(), 0);
+    char *buffer[1024] = {0};
+    ssize_t bytes_received = recv(*(incomingSocket), buffer, sizeof(buffer), MSG_WAITALL);
 
     // now we wait for the response, we will agree on the format
     // based on the format add him to the correct group
@@ -62,15 +64,22 @@ void * listRoomsTask( void * incomingSocket ){
     // Wait until further requests are done
 }
 
-void * listenThread( void * incomingSocket ){ // index will be the address of the incoming request; 
+
 
     while(true){
 
         char buffer[1024] = { 0 };
         ssize_t valread = recv(incomingSocket, buffer, sizeof(buffer), MSG_WAITALL);
         // read msg into buffer, next create threads to send for each of the servers
-        request req = decode(buffer);
+        request = decode(buffer);
         if(request.type)...
+
+        // after decoding
+        // msg will also be decoded
+        for(int i: receivers){
+
+            pthread_create(&thread[id][0], NULL, broadcastThread, message);
+        }
 
 
 
@@ -79,83 +88,75 @@ void * listenThread( void * incomingSocket ){ // index will be the address of th
 
     close(incomingSocket);
     pthread_exit(NULL) // only kill thread when connections requests to die.
-
 }
 
-
-
-void * broadcastThread( void * index ){
+void *broadcastThread(void *index)
+{
 
     // index will have a msg struct that includes recipient and sender, and we will send this msg to everyone
     // receiving thread will redirect us here with a destination that is each of the recipients
-    
-    index = *(msg *) index;
+
+    index = *(msg *)index;
     // encode msg using hashem's
-    char * buffer[1024] = { 0 };
-    buffer = encoding(index) // TODO
-    send(index->to, buffer, strlen(buffer), 0); // to will be based on socket
+    char *buffer[1024] = {0};
+    buffer = encoding(index)                        // TODO
+        send(index->to, buffer, strlen(buffer), 0); // to will be based on socket
 
-    pthread_exit(NULL);    
-
+    pthread_exit(NULL);
 }
 
-
-
-
-
-int main(){
-
-
+int main()
+{
 
     CR[0] = {}; // mainRoom
     pthread_t threads[1000];
     pthread_t wThreads[30];
     int offset = 1024;
 
-    while(true){
+    while (true)
+    {
 
         int serverSocket = socket(AF_INET, SOCK_STREAM, 0);
         struct sockaddr_in serverAddress;
         socklen_t addrlen = sizeof(serverAddress);
         serverAddress.sin_family = AF_INET;
-        serverAddress.sin_addr.s_addr = INADDR_ANY; 
-        serverAddress.sin_port = htons(offset++); 
+        serverAddress.sin_addr.s_addr = INADDR_ANY;
+        serverAddress.sin_port = htons(offset++);
 
-        //giving a port to the socket and a protocol, i.e. creating the socket
-        if ( bind( serverSocket, ( struct sockaddr*) &serverAddress, sizeof(serverAddress)) < 0){ 
-            //handling potential errors
+        if (bind(serverSocket, (struct sockaddr *)&serverAddress, sizeof(serverAddress)) < 0)
+        {
             perror(" bind failed ");
             exit(EXIT_FAILURE);
         }
         //Giving the socket the capacity to listent to incoming communication
-        if( listen(serverSocket,3) < 0 ){ // check if 3 is the capacity - understanding 3 is the queue size on this step (before acc)
+        if( listen(serverSocket,3) < 0 ){
             //handling potential error
             perror(" listen failed ");
-            exit(EXIT_FAILURE); 
+            exit(EXIT_FAILURE);
         }
         int incoming;
         //Taking in requests, if one arrives before accept then it queues up and accept does not block
         //Otherwise accept blocks and waits until a connect request occurs
-        if( (incoming = accept(serverSocket, (struct sockaddr*)& serverAddress, &addrlen)) < 0 ){
+        if( incoming = accept(serverSocket, (struct sockaddr*)& serverAddress, &addrlen) < 0 ){
             //handling potential error
             perror(" accept failed ")
-            exit(EXIT_FAILURE);
+                exit(EXIT_FAILURE);
         }
 
-        char* buffer[1024] = { 0 };
+        char *buffer[1024] = {0};
         // accepted incoming request, connecting it to a thread
 
         int valread = recv( incoming, buffer, 1024-1, 0); //reading into buffer
-        // decoding, get id and name and then establish connection
-        // add to map containing id to name
+        //decoding and get id;
+
         // creating two threads for two operations
         // first replies to the user with a list of ChatRooms
         // the other listens to broadcast requests from user to some ChatRoom that he plays part in
-        pthread_create( &thread[id], NULL, listenThread, &incoming );
+        pthread_create( &thread[id][1], NULL, pickAndListenThread, &incoming );
+
     
         // make a reply containing chat rooms available
         // available rooms sent
-
     }
 
     return 0;

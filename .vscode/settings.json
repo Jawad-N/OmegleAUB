@@ -2,9 +2,32 @@
     "git-blame.gitWebUrl": "",
     "C_Cpp.errorSquiggles": "disabled",
     "files.associations": {
+<<<<<<< HEAD
+        "*.embeddedhtml": "html",
         "random": "cpp",
+        "bitset": "cpp",
+        "chrono": "cpp",
+        "complex": "cpp",
+        "limits": "cpp",
+        "memory": "cpp",
+        "functional": "cpp",
+        "array": "cpp",
+        "string_view": "cpp",
+        "initializer_list": "cpp",
+        "regex": "cpp",
+        "utility": "cpp",
+        "valarray": "cpp",
+        "iostream": "cpp",
+        "iosfwd": "cpp"
+=======
+        "random": "cpp",
+<<<<<<< HEAD
         "thread": "cpp",
         "iosfwd": "cpp",
         "span": "cpp"
+=======
+        "thread": "cpp"
+>>>>>>> 5cabf0ac2cb062547ec9f5a7b769d363c5af5efc
+>>>>>>> b0077e366ac8a63f57957b54d30664fb2bb73a9f
     }
 }
