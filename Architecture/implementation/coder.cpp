@@ -165,3 +165,21 @@ request_list coder::decode_request_list(string req_str)
     request main_req = coder::decode_request(req_str);
     return request_list(main_req);
 }
+
+string coder::encode_request_create_CR(request_create_CR req)
+{
+    // Encoding scheme : request sep_req_repl encode_chatroom_t_request(chatroom) sep_req_repl
+    return coder::encode_request(req) + coder::sep_req_repl + coder::encode_chatroom_t(req.getChatroom()) + coder::sep_req_repl;
+}
+request_create_CR coder::decode_request_create_CR(request_create_CR req_str)
+{
+    vector<string> content = split(req_str, coder::sep_req_repl);
+    if (content.size() != 2)
+        throw runtime_error("[server] :  invalid encoding for request_create_CR. Request : " + req_str);
+    // Encoding scheme : request sep_req_repl encode_chatroom_t_request(chatroom) sep_req_repl
+    request main_req(content[0]);
+    request_create_CR req(main_req);
+    chatroom_t chatroom = coder::decode_chatroom_t(content[1]);
+    req.setChatroom(chatroom);
+    return req;
+}

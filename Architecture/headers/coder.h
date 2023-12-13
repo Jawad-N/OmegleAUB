@@ -113,6 +113,22 @@ public:
      * @return request_list
      */
     static request_list decode_request_list(string req_str);
+
+    /**
+     * @brief encodes request_create_CR to string
+     *
+     * @param req
+     * @return string
+     */
+    static string encode_request_create_CR(request_create_CR req);
+
+    /**
+     * @brief decodes string to request_create_CR
+     *
+     * @param req_str
+     * @return request_create_CR
+     */
+    static request_create_CR decode_request_create_CR(request_create_CR req_str);
 };
 
 // request_connect , request_list,request_create_CR,request_JLD_CR,request_broadcast_message,request_private_message,request_disconnect

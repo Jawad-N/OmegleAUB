@@ -136,6 +136,11 @@ request_create_CR::request_create_CR(chatroom_t chatroom) : request(create_CR)
 
 chatroom_t request_create_CR::getChatroom() const { return chatroom; }
 void request_create_CR::setChatroom(const chatroom_t &chatroom_) { chatroom = chatroom_; }
-ostream &operator<<(ostream &os, const request_create_CR &req) {}
+ostream &operator<<(ostream &os, const request_create_CR &req)
+{
+    os << static_cast<const request &>(req);
+    os << "Chatroom     : " << req.getChatroom() << '\n';
+    return os;
+}
 
 // // // // // request_create_CR_end // // // // //
