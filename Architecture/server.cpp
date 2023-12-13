@@ -4,13 +4,50 @@
 #include <stdlib.h>
 #include <sys/socket.h>
 #include <unistd.h>
-#include <chrono>
-#include <ctime>
+#include<chrono>
+#include<ctime>
+#include<mutex>
+#include<semaphore.h>
 
 using namespace std;
 
-map<int, vector<int>> CR;
-vector<int> sockets; // sockets are filedescriptors
+
+enum request_t {
+    connect_CR = 0,
+    list_CR = 1,
+    create_CR = 2,
+    join_CR = 3,
+    leave_CR = 4,
+    delete_CR = 5,
+    BROADCAST_MESSAGE = 6,
+    list_users = 7,
+    PRIVATE_MESSAGE = 8,
+    DISCONNECT = 9
+};
+
+int userCounter = 0;
+
+map<chatRoom> CR;
+vector<int> sockets; // sockets are filedescriptors, id is the index of the vector
+
+queue<request> q;
+mutex queueMutex;
+counting_semaphore<int> work(0);
+
+map< string, int > nameToSocket;
+map< int, string > socketToName;
+
+
+class request{
+    public:
+
+};
+
+
+class requestConnect : public request{
+    
+
+};
 
 struct msg
 {
@@ -19,89 +56,170 @@ struct msg
     int from;
     string s;
     time_t sendingTime;
+
 };
 
-class request
-{
-public:
-}
 
-class requestConnect : public request
-{
-
-}
-
-// server sending to client
-// first time will send the options then wait for a send
-void *
-pickAndListenThread(void *incomingSocket)
-{ // index will be the address of the incoming request;
-    incomingSocket = (int *)incomingSocket;
-    string choices = "";
-    for (pair<int, vector<int>> p : CR)
-    {
-        choices += str(p.first) + " ";
+struct chatroom_t{
+    
+    string name;
+    int capacity;
+    int size;
+    int owner;
+    time_t birthtime;
+    string description;
+    vector<int> members;
+    chatRoom(string _name, int _cap, int _size, int _owner, string _desc){
+        name = _name; capacity = _cap; size = _size; owner = _owner; description = _desc; 
+        birthtime = time(NULL); 
+        members = vector<int> ( {owner} ); // initially there is only one member that is the owner
     }
-    send(*incomingSocket, choices, choices.size(), 0);
-    char *buffer[1024] = {0};
-    ssize_t bytes_received = recv(*(incomingSocket), buffer, sizeof(buffer), MSG_WAITALL);
 
-    // now we wait for the response, we will agree on the format
-    // based on the format add him to the correct group
+};
 
-    // Manipulate CR according to his joining request;
 
-    // Wait until further requests are done
-}
 
-while (true)
-{
 
-    char buffer[1024] = {0};
-    ssize_t valread = recv(incomingSocket, buffer, sizeof(buffer), MSG_WAITALL);
-    // read msg into buffer, next create threads to send for each of the servers
-    request = decode(buffer);
-    if (request.type)
-        ...
 
-            // after decoding
-            // msg will also be decoded
-            for (int i : receivers)
-        {
 
-            pthread_create(&thread[id][0], NULL, broadcastThread, message);
+
+void * workingThread( void * index ){ // no input taken here
+
+    while(true){
+
+        work.acquire(); // only to avoid bounded waiting
+
+        queueMutex.lock();
+        request req = q.front();
+        q.pop();
+        queueMutex.unlock();
+
+        if( req.req_type == connect_CR ){
+            req = ( request_connect ) req;
+            connectRequest( req );
+        }
+        else if( req.req_type == list_CR ){
+            req = ( request_list ) req;
+            listRequest( req );
+        }
+        else if( req.req_type == create_CR ){
+
+        }
+        else if( req.req_type == join_CR ){
+        
+        }
+        else if( req.req_type == leave_CR ){
+
+        }
+        else if( req.req_type == delete_CR ){
+
+        }
+        else if( req.req_type == BROADCAST_MESSAGE ){
+        
+        }
+        else if( req.req_type == list_users){
+        
+        }
+        else if( req.req_type == DISCONNECT ){
+
+        }
+        
+    }
+
+
+} 
+
+
+void * listeningThread( void * incomingSocket ){
+
+    while(true){
+        
+        char buffer[1024] = { 0 };
+        ssize_t valread = recv(incomingSocket, buffer, sizeof(buffer), MSG_WAITALL);
+        request req = *((request *) buffer);
+        queueMutex.lock();
+        q.push(req);
+        queueMutex.unlock();
+        work.release(); // to signal a working thread to start working
+
+        if( req.reques_t == DISCONNECT ){
+            break; // when disonnecting, reach pthread_exit to kill the thread
         }
 
-    if (connectionRequestToDie == 1)
-        break;
+    }
+
+    close(incomingSocket);
+    pthread_exit(NULL) // only kill thread when connections requests to die.
+
 }
 
-close(incomingSocket);
-pthread_exit(NULL) // only kill thread when connections requests to die.
+
+
+void connectRequest( request_connect req, int socketNbr ){
+    reply_connect rep = reply_connect();
+
+    try{
+        nameToSocket[ req.user_name ] = socketNbr;
+        socketToName[ socketNbr ] = req.user_name;
+        rep.reply_id = req.request_id; 
+        rep.rep_type = connect_CR;
+        rep.status = 200;
+        rep.server_message = "Connected Succesfully";
+    }
+    catch (const exception& e){
+        rep.reply_id = req.request_id; 
+        rep.rep_type = connect_CR;
+        rep.status = 500;
+        rep.server_message = "Could not connect succesfully";
+    }
+    
+    send( socketNbr, &rep, sizeof(rep), 0 );
+
 }
 
-void *broadcastThread(void *index)
-{
+void listRequest( request_list req, int socket ){  
+    string choices = "";
+    reply_list_CR rep;
+    rep.rep_type = connect_CR;
+    rep.reply_id = req.id;
+    vector<chatroom_t> rooms;
+    try{
+        int count = 1;
+        for ( chatroom_t cr: CR ){
+            rooms.push_back(cr);
+        }
+        rep.status = 200;
+        rep.server_message = "Succesful"
+    }
+    catch (const exception& e){
+        rep.status = 500;
+        rep.server_message = "fail"
+    }    
 
-    // index will have a msg struct that includes recipient and sender, and we will send this msg to everyone
-    // receiving thread will redirect us here with a destination that is each of the recipients
+    send( socketNbr, &rep, sizeof(rep), 0 );
+    
+}
 
-    index = *(msg *)index;
-    // encode msg using hashem's
-    char *buffer[1024] = {0};
-    buffer = encoding(index)                        // TODO
-        send(index->to, buffer, strlen(buffer), 0); // to will be based on socket
 
-    pthread_exit(NULL);
+void broadcastRequest( request_broadcast_message ){
+
+    
+
 }
 
 int main()
 {
 
-    CR[0] = {}; // mainRoom
     pthread_t threads[1000];
     pthread_t wThreads[30];
+
     int offset = 1024;
+
+    for(int i = 0 ; i < 30; i++){
+        int err = pthread_create( &wThreads[i], NULL, workingThread, NULL ) ;
+        if( err != 0 ) cout << " something is wrong working thread ";
+    }
+
 
     while (true)
     {
@@ -112,7 +230,6 @@ int main()
         serverAddress.sin_family = AF_INET;
         serverAddress.sin_addr.s_addr = INADDR_ANY;
         serverAddress.sin_port = htons(offset++);
-
         if (bind(serverSocket, (struct sockaddr *)&serverAddress, sizeof(serverAddress)) < 0)
         {
             perror(" bind failed ");
@@ -134,18 +251,10 @@ int main()
             perror(" accept failed ")
                 exit(EXIT_FAILURE);
         }
-
-        char *buffer[1024] = {0};
-        // accepted incoming request, connecting it to a thread
-
-        int valread = recv(incoming, buffer, 1024 - 1, 0); // reading into buffer
-        // decoding and get id;
-
-        // creating two threads for two operations
-        // first replies to the user with a list of ChatRooms
-        // the other listens to broadcast requests from user to some ChatRoom that he plays part in
-        pthread_create(&thread[id][1], NULL, pickAndListenThread, &incoming);
-
+ 
+        int err = pthread_create( &thread[userCounter++], NULL, listeningThread, &incoming );
+        if( err != 0 ) cout << " something is wrong " << '\n';
+    
         // make a reply containing chat rooms available
         // available rooms sent
     }
