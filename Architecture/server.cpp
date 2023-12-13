@@ -8,7 +8,7 @@
 #include<ctime>
 #include<mutex>
 #include<semaphore.h>
-
+#include"Architecture/headers/structures.h"
 using namespace std;
 
 
@@ -136,7 +136,8 @@ void * listeningThread( void * incomingSocket ){
         
         char buffer[1024] = { 0 };
         ssize_t valread = recv(incomingSocket, buffer, sizeof(buffer), MSG_WAITALL);
-        request req = *((request *) buffer);
+        string buf = (string) buffer;
+        request req = decode(buf);
         queueMutex.lock();
         q.push(req);
         queueMutex.unlock();
@@ -161,7 +162,7 @@ void connectRequest( request_connect req, int socketNbr ){
     try{
         nameToSocket[ req.user_name ] = socketNbr;
         socketToName[ socketNbr ] = req.user_name;
-        rep.reply_id = req.request_id; 
+        rep. = req.request_id; 
         rep.rep_type = connect_CR;
         rep.status = 200;
         rep.server_message = "Connected Succesfully";
@@ -172,8 +173,10 @@ void connectRequest( request_connect req, int socketNbr ){
         rep.status = 500;
         rep.server_message = "Could not connect succesfully";
     }
-    
-    send( socketNbr, &rep, sizeof(rep), 0 );
+    //
+    string 
+    char * buffer = encode(rep);
+    send( socketNbr, , sizeof(buffer), 0 );
 
 }
 
