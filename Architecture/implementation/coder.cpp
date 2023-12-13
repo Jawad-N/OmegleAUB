@@ -1,8 +1,8 @@
 #include "../headers/coder.h"
 
 char coder::sep = '\u001F'; // non-printable characters
-char coder::sep_req_repl = 'x';
-
+char coder::sep_req_repl = '\u0009';
+char coder::sep_req_repl_main = '\u0006';
 string coder::encode_chatroom_t(chatroom_t chatroom, bool req_or_repl)
 {
     // to_add from time_t to time
@@ -12,7 +12,7 @@ string coder::encode_chatroom_t(chatroom_t chatroom, bool req_or_repl)
     if (req_or_repl)
         extra = coder::sep + to_string((int)chatroom.getMembers().size());
 
-    return to_string(chatroom.getchatroomID()) + coder::sep + to_string(chatroom.getCapacity()) + extra + coder::sep + to_string(chatroom.getCreated()) + coder::sep + chatroom.getName() + coder::sep + chatroom.getDescription();
+    return to_string(chatroom.getchatroomID()) + coder::sep + to_string(chatroom.getCapacity()) + extra + coder::sep + to_string(chatroom.getCreated()) + coder::sep + chatroom.getName() + coder::sep + chatroom.getDescription() + coder::sep;
 }
 
 chatroom_t coder::decode_chatroom_t(string chatroom_str, bool req_or_repl)
@@ -61,7 +61,7 @@ string coder::encode_chatroom_t(chatroom_t chatroom)
     // members_encoding += "]";
     return to_string(chatroom.getchatroomID()) + coder::sep + to_string(chatroom.getCapacity()) + coder::sep + to_string((int)chatroom.getMembers().size()) + coder::sep +
            chatroom.getOwner() + coder::sep + to_string(chatroom.getCreated()) + coder::sep + members_encoding + coder::sep +
-           chatroom.getName() + coder::sep + chatroom.getDescription();
+           chatroom.getName() + coder::sep + chatroom.getDescription() + coder::sep;
 }
 
 chatroom_t coder::decode_chatroom_t(string chatroom_str)
@@ -95,7 +95,7 @@ string coder::encode_message_t(message_t message)
     // Encoding scheme: sender sep created sep content
     // return
 
-    return message.getSender() + coder::sep + to_string(message.getCreated()) + coder::sep + message.getContent();
+    return message.getSender() + coder::sep + to_string(message.getCreated()) + coder::sep + message.getContent() + coder::sep;
 }
 
 message_t coder::decode_message_t(string message_t_str)
@@ -111,3 +111,39 @@ message_t coder::decode_message_t(string message_t_str)
     message.setContent(content[2]);
     return message;
 }
+
+string coder::encode_request(request req)
+{
+    // Encoding scheme : req_type sep_req_repl_main request_id sep_req_repl_main from
+    return to_string(req.getreqType()) + coder::sep_req_repl_main +
+           to_string(req.getrequestId()) + coder::sep_req_repl_main + req.getFrom() + coder::sep_req_repl_main;
+}
+
+request coder::decode_request(string req_str)
+{
+    // Encoding scheme : req_type sep_req_repl_main request_id sep_req_repl_main from
+    vector<string> content = split(req_str, coder::sep_req_repl_main);
+    // cout << content.size() << '\n';
+    if (content.size() != 3)
+        throw runtime_error("[server] :  invalid encoding for request. Request : " + req_str);
+    request req;
+    req.setReqType((request_t)stoi(content[0]));
+    req.setRequestId(stoi(content[1]));
+    req.setFrom(content[2]);
+    return req;
+}
+
+string request_connect::encode_request_connect(request_connect req)
+{
+    // encode_request(req) sep_req_repl user_name;
+    return coder::encode_request(req) + coder::sep_req_repl + req.getuserName() + coder::sep_req_repl;
+}
+
+// request_connect request_connect::decode_request_connect(string req_str)
+// {
+//     vector<string> content = split(req_str, coder::sep_req_repl);
+
+//     // cout << content.size() << '\n';
+//     if (content.size() != 3)
+//         throw runtime_error("[server] :  invalid encoding for request. Request : " + req_str);
+// }

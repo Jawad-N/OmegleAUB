@@ -10,8 +10,10 @@ class coder
 public:
     // seperator for the structures.h
     static char sep;
-    // seperator for replies and requests
+    // seperator for subclasses of reply and request
     static char sep_req_repl;
+    // seperator for main request and reply classes
+    static char sep_req_repl_main;
     /**
      * @brief Encodes chatroom_t type according to the following scheme
      * request: id sep capacity sep created sep name sep description
@@ -63,4 +65,38 @@ public:
      * @return message_t
      */
     static message_t decode_message_t(string message_t_str);
+
+    /**
+     * @brief Encodes request structure
+     * req_type sep_req_repl_main request_id sep_req_repl_main from (encoding scheme)
+     * @param req
+     * @return string
+     */
+    static string encode_request(request req);
+
+    /**
+     * @brief
+     *
+     * @param req_str
+     * @return request
+     */
+    static request decode_request(string req_str);
+
+    /**
+     * @brief
+     * Encoding scheme encode_request(req) sep_req_repl user_name;
+     * @param req
+     * @return string
+     */
+    static string encode_request_connect(request_connect req);
+
+    /**
+     * @brief
+     *
+     * @param req_str
+     * @return request_connect
+     */
+    static request_connect decode_request_connect(string req_str);
 };
+
+// request_connect , request_list,request_create_CR,request_JLD_CR,request_broadcast_message,request_private_message,request_disconnect
