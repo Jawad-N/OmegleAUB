@@ -11,8 +11,9 @@ enum request_t
     join_CR = 3,
     leave_CR = 4,
     delete_CR = 5,
-    BROADCASE_MESSAGE = 6,
+    BROADCAST_MESSAGE = 6,
     list_users = 7,
     PRIVATE_MESSAGE = 8,
-    DISCONNECT = 9
+    DISCONNECT = 9,
+    connect_USR = 10
 };

@@ -1,8 +1,8 @@
 #include "../headers/coder.h"
 
 char coder::sep = '\u001F'; // non-printable characters
-char coder::sep_req_repl = 'x';
-
+char coder::sep_req_repl = '\u0009';
+char coder::sep_req_repl_main = '\u0006';
 string coder::encode_chatroom_t(chatroom_t chatroom, bool req_or_repl)
 {
     // to_add from time_t to time
@@ -110,4 +110,25 @@ message_t coder::decode_message_t(string message_t_str)
     message.setCreated(stoi(content[1]));
     message.setContent(content[2]);
     return message;
+}
+
+string coder::encode_request(request req)
+{
+    // Encoding scheme : req_type sep_req_repl_main request_id sep_req_repl_main from
+    return to_string(req.getreqType()) + coder::sep_req_repl_main +
+           to_string(req.getrequestId()) + coder::sep_req_repl_main + req.getFrom() + coder::sep_req_repl_main;
+}
+
+request coder::decode_request(string req_str)
+{
+    // Encoding scheme : req_type sep_req_repl_main request_id sep_req_repl_main from
+    vector<string> content = split(req_str, coder::sep_req_repl_main);
+    // cout << content.size() << '\n';
+    if (content.size() != 3)
+        throw runtime_error("[server] :  invalid encoding for request. Request : " + req_str);
+    request req;
+    req.setReqType((request_t)stoi(content[0]));
+    req.setRequestId(stoi(content[1]));
+    req.setFrom(content[2]);
+    return req;
 }
