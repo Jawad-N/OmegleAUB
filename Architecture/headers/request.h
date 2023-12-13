@@ -26,7 +26,7 @@ public:
      */
     request();
     request(request_t req_type);
-    request(request other);
+    request(const request &other);
 
     /**
      * @brief Getters and setters
@@ -55,6 +55,8 @@ public:
     // By default request_t : request_connect
 
     request_connect(string user_name);
+    request_connect(const request &other);
+    request_connect(const request_connect &other);
     request_connect();
 
     string getuserName() const;
@@ -65,25 +67,28 @@ class request_list : public request
 {
     // valid request_t : list_users | list_CR
 public:
+    request_list();
+    request_list(const request &other);
+    request_list(const request_list &other);
     request_list(request_t req_type);
-    friend ostream &operator<<(ostream &os, const request &req);
+    friend ostream &operator<<(ostream &os, const request_list &req);
 };
 
 class request_create_CR : public request
 {
     // valid request_t : create_CR
-public:
-    friend ostream &operator<<(ostream &os, const request &req);
-
 private:
     chatroom_t chatroom;
 
 public:
+    request_create_CR();
+    request_create_CR(const request &other);
+    request_create_CR(const request_create_CR &other);
     request_create_CR(chatroom_t chatroom);
 
     chatroom_t getChatroom() const { return chatroom; }
     void setChatroom(const chatroom_t &chatroom_) { chatroom = chatroom_; }
-    friend ostream &operator<<(ostream &os, const request &req);
+    friend ostream &operator<<(ostream &os, const request_create_CR &req);
 };
 
 class request_JLD_CR : public request
@@ -97,7 +102,7 @@ public:
 
     int chatroomID() const { return chatroom_ID; }
     void setChatroomID(int chatroomID) { chatroom_ID = chatroomID; }
-    friend ostream &operator<<(ostream &os, const request &req);
+    friend ostream &operator<<(ostream &os, const request_JLD_CR &req);
 };
 
 class request_broadcast_message : public request
@@ -115,7 +120,7 @@ public:
 
     message_t getMessage() const { return message; }
     void setMessage(const message_t &message_) { message = message_; }
-    friend ostream &operator<<(ostream &os, const request &req);
+    friend ostream &operator<<(ostream &os, const request_broadcast_message &req);
 };
 
 class request_private_message : public request
@@ -133,7 +138,7 @@ public:
 
     message_t getMessage() const { return message; }
     void setMessage(const message_t &message_) { message = message_; }
-    friend ostream &operator<<(ostream &os, const request &req);
+    friend ostream &operator<<(ostream &os, const request_private_message &req);
 };
 
 class request_disconnect : public request
@@ -141,7 +146,7 @@ class request_disconnect : public request
     // valid request_t : DISCONNECT
 public:
     request_disconnect();
-    friend ostream &operator<<(ostream &os, const request &req);
+    friend ostream &operator<<(ostream &os, const request_disconnect &req);
 };
 
 // request_connect , request_list,request_create_CR,request_JLD_CR,request_broadcast_message,request_private_message,request_disconnect

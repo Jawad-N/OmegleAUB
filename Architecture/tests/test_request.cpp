@@ -32,11 +32,26 @@ void test_connect_request()
      request_connect REQ("Hashem");
      cout << REQ << '\n';
 }
+
+void test_connect_request_encoding_decoding()
+{
+     request_connect REQ("Hashem");
+     cout << REQ << '\n';
+     cout.flush();
+     string encoding = coder::encode_request_connect(REQ);
+     cout << "Encoding: " << encoding << '\n';
+     cout.flush();
+     request_connect decoding = coder::decode_request_connect(encoding);
+
+     cout << "Decoding : \n"
+          << decoding << '\n';
+}
 int main()
 {
      // test_request_create();
      // test_request_encoding();
-     test_connect_request();
+     // test_connect_request();
+     test_connect_request_encoding_decoding();
 
      return 0;
 }

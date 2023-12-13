@@ -25,7 +25,7 @@ bool chatroom_t::add_member(id member)
 {
     // should raise two errors. One for full capacity and other for user already found
     // or return status code.
-    if (members.size() >= capacity || members.find(member) != members.end())
+    if ((int)members.size() >= capacity || members.find(member) != members.end())
         return false;
     members.insert(member);
     return true;
