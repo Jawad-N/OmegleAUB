@@ -19,6 +19,18 @@ chatroom_t::chatroom_t(int chatroom_ID, string name, int capacity, id owner, tim
     this->owner = owner;
     this->created = created;
     this->description = description;
+    this->members.insert(owner);
+}
+
+chatroom_t::chatroom_t(const chatroom_t &other)
+{
+    this->chatroom_ID = other.chatroom_ID;
+    this->name = other.name;
+    this->capacity = other.capacity;
+    this->owner = other.owner;
+    this->created = other.created;
+    this->description = other.description;
+    this->members = other.members;
 }
 
 bool chatroom_t::add_member(id member)
@@ -85,6 +97,12 @@ message_t::message_t(id sender, string content, time_t created)
     this->sender = sender;
     this->content = content;
     this->created = created;
+}
+message_t::message_t(const message_t &other)
+{
+    this->sender = other.sender;
+    this->content = other.content;
+    this->created = other.created;
 }
 
 id message_t::getSender() const { return sender; }

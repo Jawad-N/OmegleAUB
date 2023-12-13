@@ -21,6 +21,7 @@ private:
 public:
     chatroom_t();
     chatroom_t(int chatroom_ID, string name, int capacity, id owner, time_t created, string description);
+    chatroom_t(const chatroom_t &other);
     /**
      * @brief Attempts to add member to this chatroom
      *
@@ -68,6 +69,7 @@ private:
 public:
     message_t();
     message_t(id sender, string content, time_t created);
+    message_t(const message_t &other);
 
     friend ostream &operator<<(ostream &os, const message_t &message);
     /**
