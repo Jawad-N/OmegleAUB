@@ -26,6 +26,7 @@ public:
      */
     request();
     request(request_t req_type);
+    request(request other);
 
     /**
      * @brief Getters and setters
@@ -60,7 +61,6 @@ public:
     void setUserName(const string &userName);
     friend ostream &operator<<(ostream &os, const request_connect &req);
 };
-
 class request_list : public request
 {
     // valid request_t : list_users | list_CR
@@ -143,3 +143,5 @@ public:
     request_disconnect();
     friend ostream &operator<<(ostream &os, const request &req);
 };
+
+// request_connect , request_list,request_create_CR,request_JLD_CR,request_broadcast_message,request_private_message,request_disconnect

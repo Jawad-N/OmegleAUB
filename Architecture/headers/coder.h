@@ -68,7 +68,7 @@ public:
 
     /**
      * @brief Encodes request structure
-     * req_type sep_req_repl request_id sep_req_repl from (encoding scheme)
+     * req_type sep_req_repl_main request_id sep_req_repl_main from (encoding scheme)
      * @param req
      * @return string
      */
@@ -81,4 +81,22 @@ public:
      * @return request
      */
     static request decode_request(string req_str);
+
+    /**
+     * @brief
+     * Encoding scheme encode_request(req) sep_req_repl user_name;
+     * @param req
+     * @return string
+     */
+    static string encode_request_connect(request_connect req);
+
+    /**
+     * @brief
+     *
+     * @param req_str
+     * @return request_connect
+     */
+    static request_connect decode_request_connect(string req_str);
 };
+
+// request_connect , request_list,request_create_CR,request_JLD_CR,request_broadcast_message,request_private_message,request_disconnect

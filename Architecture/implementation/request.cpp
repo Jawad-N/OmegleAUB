@@ -29,6 +29,13 @@ request::request(request_t req_type)
     this->from = "";
 }
 
+request::request(request other)
+{
+    this->req_type = other.getreqType();
+    this->request_id = other.getrequestId();
+    this->from = other.getFrom();
+}
+
 int request::getrequestId() const { return request_id; }
 void request::setRequestId(int requestId) { request_id = requestId; }
 

@@ -12,7 +12,7 @@ string coder::encode_chatroom_t(chatroom_t chatroom, bool req_or_repl)
     if (req_or_repl)
         extra = coder::sep + to_string((int)chatroom.getMembers().size());
 
-    return to_string(chatroom.getchatroomID()) + coder::sep + to_string(chatroom.getCapacity()) + extra + coder::sep + to_string(chatroom.getCreated()) + coder::sep + chatroom.getName() + coder::sep + chatroom.getDescription();
+    return to_string(chatroom.getchatroomID()) + coder::sep + to_string(chatroom.getCapacity()) + extra + coder::sep + to_string(chatroom.getCreated()) + coder::sep + chatroom.getName() + coder::sep + chatroom.getDescription() + coder::sep;
 }
 
 chatroom_t coder::decode_chatroom_t(string chatroom_str, bool req_or_repl)
@@ -61,7 +61,7 @@ string coder::encode_chatroom_t(chatroom_t chatroom)
     // members_encoding += "]";
     return to_string(chatroom.getchatroomID()) + coder::sep + to_string(chatroom.getCapacity()) + coder::sep + to_string((int)chatroom.getMembers().size()) + coder::sep +
            chatroom.getOwner() + coder::sep + to_string(chatroom.getCreated()) + coder::sep + members_encoding + coder::sep +
-           chatroom.getName() + coder::sep + chatroom.getDescription();
+           chatroom.getName() + coder::sep + chatroom.getDescription() + coder::sep;
 }
 
 chatroom_t coder::decode_chatroom_t(string chatroom_str)
@@ -95,7 +95,7 @@ string coder::encode_message_t(message_t message)
     // Encoding scheme: sender sep created sep content
     // return
 
-    return message.getSender() + coder::sep + to_string(message.getCreated()) + coder::sep + message.getContent();
+    return message.getSender() + coder::sep + to_string(message.getCreated()) + coder::sep + message.getContent() + coder::sep;
 }
 
 message_t coder::decode_message_t(string message_t_str)
@@ -132,3 +132,18 @@ request coder::decode_request(string req_str)
     req.setFrom(content[2]);
     return req;
 }
+
+string request_connect::encode_request_connect(request_connect req)
+{
+    // encode_request(req) sep_req_repl user_name;
+    return coder::encode_request(req) + coder::sep_req_repl + req.getuserName() + coder::sep_req_repl;
+}
+
+// request_connect request_connect::decode_request_connect(string req_str)
+// {
+//     vector<string> content = split(req_str, coder::sep_req_repl);
+
+//     // cout << content.size() << '\n';
+//     if (content.size() != 3)
+//         throw runtime_error("[server] :  invalid encoding for request. Request : " + req_str);
+// }
