@@ -49,7 +49,8 @@ class requestConnect : public request{
 
 };
 
-struct msg{
+struct msg
+{
 
     int to;
     int from;
@@ -234,17 +235,19 @@ int main()
             perror(" bind failed ");
             exit(EXIT_FAILURE);
         }
-        //Giving the socket the capacity to listent to incoming communication
-        if( listen(serverSocket,3) < 0 ){
-            //handling potential error
+        // Giving the socket the capacity to listent to incoming communication
+        if (listen(serverSocket, 3) < 0)
+        {
+            // handling potential error
             perror(" listen failed ");
             exit(EXIT_FAILURE);
         }
         int incoming;
-        //Taking in requests, if one arrives before accept then it queues up and accept does not block
-        //Otherwise accept blocks and waits until a connect request occurs
-        if( incoming = accept(serverSocket, (struct sockaddr*)& serverAddress, &addrlen) < 0 ){
-            //handling potential error
+        // Taking in requests, if one arrives before accept then it queues up and accept does not block
+        // Otherwise accept blocks and waits until a connect request occurs
+        if (incoming = accept(serverSocket, (struct sockaddr *)&serverAddress, &addrlen) < 0)
+        {
+            // handling potential error
             perror(" accept failed ")
                 exit(EXIT_FAILURE);
         }
