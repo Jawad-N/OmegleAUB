@@ -19,6 +19,7 @@ chatroom_t::chatroom_t(int chatroom_ID, string name, int capacity, id owner, tim
     this->owner = owner;
     this->created = created;
     this->description = description;
+    this->members.insert(owner);
 }
 
 bool chatroom_t::add_member(id member)
