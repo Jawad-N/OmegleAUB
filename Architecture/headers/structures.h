@@ -68,4 +68,20 @@ private:
 public:
     message_t();
     message_t(id sender, string content, time_t created);
+
+    friend ostream &operator<<(ostream &os, const message_t &message);
+    /**
+     * @brief Getters and setters of objects
+     *
+     *
+     */
+
+    id getSender() const;
+    void setSender(const id &sender_);
+
+    string getContent() const;
+    void setContent(const string &content_);
+
+    time_t getCreated() const;
+    void setCreated(const time_t &created_);
 };

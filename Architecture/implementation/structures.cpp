@@ -73,3 +73,35 @@ ostream &operator<<(std::ostream &os, const chatroom_t &chatroom)
 
     return os;
 }
+
+message_t::message_t()
+{
+    this->sender = "";
+    this->content = "";
+    this->created = time(nullptr);
+}
+message_t::message_t(id sender, string content, time_t created)
+{
+    this->sender = sender;
+    this->content = content;
+    this->created = created;
+}
+
+id message_t::getSender() const { return sender; }
+void message_t::setSender(const id &sender_) { sender = sender_; }
+
+string message_t::getContent() const { return content; }
+void message_t::setContent(const string &content_) { content = content_; }
+
+time_t message_t::getCreated() const { return created; }
+void message_t::setCreated(const time_t &created_) { created = created_; }
+
+ostream &operator<<(ostream &os, const message_t &message)
+{
+    os << ":::::::::::: Message Begin ::::::::::::\n";
+    os << "Sender  : " << message.getSender() << '\n';
+    os << "Sent at : " << TimeConverter::timeToString(message.getCreated()) << '\n';
+    os << "Content : " << message.getContent() << '\n';
+    os << ":::::::::::: Message End   ::::::::::::\n";
+    return os;
+}
