@@ -55,6 +55,7 @@ void C_handler::connectToServer(string username)
 
 void C_handler::listAvailableChatrooms()
 {
+    cout << "Handling listing available rooms.\n";
 
     // create request_list
 

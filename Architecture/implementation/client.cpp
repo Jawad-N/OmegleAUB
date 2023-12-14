@@ -118,8 +118,8 @@ void Client::setChatrooms(const set<int> &chatrooms_) { chatrooms = chatrooms_; 
 set<id> Client::getUsers() const { return users; }
 void Client::setUsers(const set<id> &users_) { users = users_; }
 
-map<int, request> Client::pendingRequests() const { return pending_requests; }
-void Client::setPendingRequests(const map<int, request> &pendingRequests) { pending_requests = pendingRequests; }
+// map<int, request> Client::getpendingRequests() const { return pending_requests; }
+// void Client::setPendingRequests(const map<int, request> &pendingRequests) { pending_requests = pendingRequests; }
 
 pthread_t Client::getlThread() const { return l_thread; }
 void Client::setLThread(const pthread_t &lThread) { l_thread = lThread; }
