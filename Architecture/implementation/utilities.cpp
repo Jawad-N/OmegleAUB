@@ -47,8 +47,6 @@ vector<string> split(string text, char delimeter)
     }
     return results;
 }
-
-
 void copy_to_pointer( string s, char * output ){
 
     int n = s.size();

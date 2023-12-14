@@ -97,6 +97,38 @@ public:
      * @return request_connect
      */
     static request_connect decode_request_connect(string req_str);
+
+    /**
+     * @brief encodes request_list
+     * encoding scheme : encode_request()
+     * @param req
+     * @return string
+     */
+    static string encode_request_list(request_list req);
+
+    /**
+     * @brief decodes string to request_list
+     *
+     * @param req_str
+     * @return request_list
+     */
+    static request_list decode_request_list(string req_str);
+
+    /**
+     * @brief encodes request_create_CR to string
+     *
+     * @param req
+     * @return string
+     */
+    static string encode_request_create_CR(request_create_CR req);
+
+    /**
+     * @brief decodes string to request_create_CR
+     *
+     * @param req_str
+     * @return request_create_CR
+     */
+    static request_create_CR decode_request_create_CR(string req_str);
 };
 
 // request_connect , request_list,request_create_CR,request_JLD_CR,request_broadcast_message,request_private_message,request_disconnect

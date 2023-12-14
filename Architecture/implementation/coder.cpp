@@ -1,4 +1,5 @@
 #include "../headers/coder.h"
+#include "../headers/request.h"
 
 char coder::sep = '\u001F'; // non-printable characters
 char coder::sep_req_repl = '\u0009';
@@ -133,17 +134,52 @@ request coder::decode_request(string req_str)
     return req;
 }
 
-string request_connect::encode_request_connect(request_connect req)
+string coder::encode_request_connect(request_connect req)
 {
-    // encode_request(req) sep_req_repl user_name;
+    // encode_request(req) sep_req_repl user_name sep_req_repl
     return coder::encode_request(req) + coder::sep_req_repl + req.getuserName() + coder::sep_req_repl;
 }
 
-// request_connect request_connect::decode_request_connect(string req_str)
-// {
-//     vector<string> content = split(req_str, coder::sep_req_repl);
+request_connect coder::decode_request_connect(string req_str)
+{
+    // encode_request(req) sep_req_repl user_name sep_req_repl
+    vector<string> content = split(req_str, coder::sep_req_repl);
+    // cout << content.size() << '\n';
+    if (content.size() != 2)
+        throw runtime_error("[server] :  invalid encoding for request_connect. Request : " + req_str);
+    // Add try catch blocks for each one
+    request main_req = coder::decode_request(content[0]);
+    request_connect req(main_req);
+    req.setUserName(content[1]);
+    return req;
+}
 
-//     // cout << content.size() << '\n';
-//     if (content.size() != 3)
-//         throw runtime_error("[server] :  invalid encoding for request. Request : " + req_str);
-// }
+string coder::encode_request_list(request_list req)
+{
+    // encoding scheme : encode_request(req)
+    return coder::encode_request(req);
+}
+
+request_list coder::decode_request_list(string req_str)
+{
+    request main_req = coder::decode_request(req_str);
+    return request_list(main_req);
+}
+
+string coder::encode_request_create_CR(request_create_CR req)
+{
+    // Encoding scheme : request sep_req_repl encode_chatroom_t_request(chatroom) sep_req_repl
+    return coder::encode_request(req) + coder::sep_req_repl + coder::encode_chatroom_t(req.getChatroom(), false) + coder::sep_req_repl;
+}
+request_create_CR coder::decode_request_create_CR(string req_str)
+{
+    vector<string> content = split(req_str, coder::sep_req_repl);
+    if (content.size() != 2)
+        throw runtime_error("[server] :  invalid encoding for request_create_CR. Request : " + req_str);
+    // Encoding scheme : request sep_req_repl encode_chatroom_t_request(chatroom) sep_req_repl
+    request main_req = coder::decode_request(content[0]);
+    request_create_CR req(main_req);
+    chatroom_t chatroom = coder::decode_chatroom_t(content[1], false);
+    req.setChatroom(chatroom);
+    return req;
+}

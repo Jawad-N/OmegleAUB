@@ -29,7 +29,7 @@ request::request(request_t req_type)
     this->from = "";
 }
 
-request::request(request other)
+request::request(const request &other)
 {
     this->req_type = other.getreqType();
     this->request_id = other.getrequestId();
@@ -55,14 +55,23 @@ ostream &operator<<(ostream &os, const request &req)
 
 // request_connect_start
 
-request_connect::request_connect(string user_name)
+request_connect::request_connect(string user_name) : request(connect_USR)
 {
     setUserName(user_name);
-    setReqType(connect_USR);
 }
-request_connect::request_connect()
+request_connect::request_connect() : request()
 {
     setUserName("");
+}
+
+request_connect::request_connect(const request &other) : request(other)
+{
+    setUserName("");
+}
+
+request_connect::request_connect(const request_connect &other) : request(other)
+{
+    setUserName(other.getuserName());
 }
 
 string request_connect::getuserName() const { return user_name; }
@@ -75,3 +84,66 @@ ostream &operator<<(ostream &os, const request_connect &req)
 }
 
 // request_connect_end
+
+// request_list,request_create_CR,request_JLD_CR,request_broadcast_message,request_private_message,request_disconnect
+
+// // // // // request_list_start // // // // //
+request_list::request_list() : request(list_CR) {}
+request_list::request_list(const request &other) : request(other)
+{
+    if (other.getreqType() != list_users && other.getreqType() != list_CR)
+        throw runtime_error("[server] : Error creating request_list from request constructor. reqtype incompatible");
+}
+request_list::request_list(const request_list &other) : request(other)
+{
+    if (other.getreqType() != list_users && other.getreqType() != list_CR)
+        throw runtime_error("[server] : Error creating request_list from request_list constructor. reqtype incompatible");
+}
+request_list::request_list(request_t req_type) : request(req_type)
+{
+    if (req_type != list_users && req_type != list_CR)
+        throw runtime_error("[server] : Error creating request_list from request_t constructor. reqtype incompatible");
+}
+ostream &operator<<(ostream &os, const request_list &req)
+{
+    os << static_cast<const request &>(req);
+    return os;
+}
+// // // // // request_list_end // // // // //
+
+// // // // // request_create_CR_start // // // // //
+
+request_create_CR::request_create_CR() : request(create_CR)
+{
+}
+request_create_CR::request_create_CR(const request &other) : request(other)
+{
+    if (other.getreqType() != create_CR)
+        throw runtime_error("[server] : Error creating request_create_CR from request constructor. reqtype incompatible");
+}
+request_create_CR::request_create_CR(const request_create_CR &other) : request(other)
+{
+    if (other.getreqType() != create_CR)
+        throw runtime_error("[server] : Error creating request_create_CR from request constructor. reqtype incompatible");
+
+    // Add copy constructor for chatroom
+    setChatroom(other.getChatroom());
+}
+request_create_CR::request_create_CR(chatroom_t chatroom) : request(create_CR)
+{
+    setChatroom(chatroom);
+}
+
+chatroom_t request_create_CR::getChatroom() const { return chatroom; }
+void request_create_CR::setChatroom(const chatroom_t &chatroom_) { chatroom = chatroom_; }
+ostream &operator<<(ostream &os, const request_create_CR &req)
+{
+    os << static_cast<const request &>(req);
+    os << "Chatroom     : \n";
+    os << "- - - - - - - - - - - - -\n";
+    os << req.getChatroom() << '\n';
+    os << "- - - - - - - - - - - - -\n";
+    return os;
+}
+
+// // // // // request_create_CR_end // // // // //

@@ -70,7 +70,6 @@ public:
     message_t();
     message_t(id sender, string content, time_t created);
     message_t(const message_t &other);
-    
 
     friend ostream &operator<<(ostream &os, const message_t &message);
     /**
