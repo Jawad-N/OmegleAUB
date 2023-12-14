@@ -8,10 +8,10 @@
 #include<ctime>
 #include<mutex>
 #include<semaphore.h>
-#include"Architecture/headers/structures.h"
-#include"Architecture/headers/utilities.h"
-#include"Architecture/headers/request.h"
-#include"Architecture/headers/reply.h"
+#include"headers/structures.h"
+#include"headers/utilities.h"
+#include"headers/request.h"
+#include"headers/reply.h"
 using namespace std;
 
 
@@ -172,12 +172,20 @@ void connectRequest( request_connect req ){
     reply_connect rep;
 
     try{
-        nameToSocket[ req.getuserName() ] = req.getSocket();
-        socketToName[ req.getSocket() ] = req.getuserName(); 
-        rep.setReplyID( req.getrequestId() );
-        rep.setReplyType( connect_CR ); 
-        rep.setStatus( 200 );
-        rep.setServerMessage( "Connected Succesfully" );
+        if( nameToSocket.find( req.getuserName() ) == nameToSocket.end() ){
+            rep.setReplyID( req.getrequestId() );
+            rep.setReplyType( connect_CR ); 
+            rep.setStatus( 200 );
+            rep.setServerMessage( "Username Already taken!" );
+        }
+        else{
+            nameToSocket[ req.getuserName() ] = req.getSocket();
+            socketToName[ req.getSocket() ] = req.getuserName(); 
+            rep.setReplyID( req.getrequestId() );
+            rep.setReplyType( connect_CR ); 
+            rep.setStatus( 200 );
+            rep.setServerMessage( "Connected Succesfully" );
+        }
     }
     catch (const exception& e){
         rep.setReplyID( req.getrequestId ); 
@@ -214,7 +222,8 @@ void listRequest( request_list req ){
     
 }
 
-
+int roomCount = 0;
+// TODO
 //checked
 void createRequest( request_create_CR req ) {
     reply_create_CR rep;
