@@ -1,17 +1,23 @@
 #include "../headers/reply.h"
+#include "../headers/coder.h"
 
 void test_reply()
 {
     // creating replies from all constructors
     reply main_reply_empty;
     reply main_reply_default(list_CR);
-    reply main_reply_args(23, BROADCAST_MESSAGE, 200, "Hello. Here's the server");
+    reply main_reply_args(23, BROADCAST_MESSAGE, 200, "");
     reply main_reply_copy(main_reply_args);
 
     cout << main_reply_empty << '\n';
     cout << main_reply_default << '\n';
     cout << main_reply_args << '\n';
     cout << main_reply_copy << '\n';
+    string encoding = coder::encode_reply(main_reply_args);
+
+    cout << "Encoding: " << encoding << '\n';
+    reply decoding = coder::decode_reply(encoding);
+    cout << "Decoding: " << decoding << '\n';
 
     // Encoding section
 }
@@ -45,7 +51,7 @@ void test_reply_list_users();
 
 int main()
 {
-    // test_reply();
-    test_reply_connect();
+    test_reply();
+    // test_reply_connect();
     return 0;
 }

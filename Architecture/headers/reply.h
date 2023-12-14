@@ -72,15 +72,15 @@ public:
 class reply_create_CR : public reply
 {
 private:
-    int chatroom_id;
+    chatroom_t chatroom;
 
 public:
     reply_create_CR();
-    reply_create_CR(int reply_id, int status, string server_message, int chatroom_id);
-    reply_create_CR(const reply &other, int chatroom_id);
+    reply_create_CR(int reply_id, int status, string server_message, chatroom_t chatroom);
+    reply_create_CR(const reply &other, chatroom_t chatroom);
     reply_create_CR(const reply_create_CR &other);
-    int getChatroomId() const;
-    void setChatroomId(int chatroomId);
+    chatroom_t getChatroom() const;
+    void setChatroom(const chatroom_t &chatroom);
 
     friend ostream &operator<<(ostream &os, const reply_create_CR &rep);
 };
@@ -160,4 +160,15 @@ public:
     void setUsers(const vector<id> &users_);
 
     friend ostream &operator<<(ostream &os, const reply_list_users &rep);
+};
+
+class reply_disconnect : public reply
+{
+public:
+    reply_disconnect();
+    reply_disconnect(int reply_id, int status, string server_message);
+    reply_disconnect(const reply &other);
+    reply_disconnect(const reply_disconnect &other);
+
+    friend ostream &operator<<(ostream &os, const reply_disconnect &rep);
 };

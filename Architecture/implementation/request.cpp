@@ -147,3 +147,38 @@ ostream &operator<<(ostream &os, const request_create_CR &req)
 }
 
 // // // // // request_create_CR_end // // // // //
+
+// // // // // request_create_CR_start // // // // //
+request_JLD_CR::request_JLD_CR() : request()
+{
+    setReqType(leave_CR);
+}
+request_JLD_CR::request_JLD_CR(request_t req_type, int chatroom_ID) : request(req_type)
+{
+    // if
+    if (req_type != join_CR && req_type != leave_CR && req_type != delete_CR)
+        throw runtime_error("[server] : Error creating request_JLD_CR from request_t constructor. reqtype incompatible");
+    setChatroomID(chatroom_ID);
+}
+request_JLD_CR::request_JLD_CR(const request &other, int chatroom_ID) : request(other)
+{
+    if (other.getreqType() != join_CR && other.getreqType() != leave_CR && other.getreqType() != delete_CR)
+        throw runtime_error("[server] : Error creating request_JLD_CR from request constructor. reqtype incompatible");
+    setChatroomID(chatroom_ID);
+}
+request_JLD_CR::request_JLD_CR(const request_JLD_CR &other) : request(other)
+{
+    if (other.getreqType() != join_CR && other.getreqType() != leave_CR && other.getreqType() != delete_CR)
+        throw runtime_error("[server] : Error creating request_JLD_CR from request_JLD_CR constructor. reqtype incompatible");
+    setChatroomID(other.getchatroomID());
+}
+
+int request_JLD_CR::getchatroomID() const { return chatroom_ID; }
+void request_JLD_CR::setChatroomID(int chatroomID) { chatroom_ID = chatroomID; }
+ostream &operator<<(ostream &os, const request_JLD_CR &req)
+{
+    os << static_cast<const request &>(req);
+    os << "Chatroom ID  : " << req.getchatroomID() << '\n';
+    return os;
+}
+// // // // // request_create_CR_end // // // // //

@@ -98,10 +98,13 @@ private:
     int chatroom_ID;
 
 public:
+    request_JLD_CR();
     request_JLD_CR(request_t req_type, int chatroom_ID);
+    request_JLD_CR(const request &other, int chatroom_ID);
+    request_JLD_CR(const request_JLD_CR &other);
 
-    int chatroomID() const { return chatroom_ID; }
-    void setChatroomID(int chatroomID) { chatroom_ID = chatroomID; }
+    int getchatroomID() const;
+    void setChatroomID(int chatroomID);
     friend ostream &operator<<(ostream &os, const request_JLD_CR &req);
 };
 
@@ -113,9 +116,14 @@ private:
     message_t message;
 
 public:
+    request_broadcast_message();
     request_broadcast_message(int chatroom_ID, message_t message);
+    request_broadcast_message(const request &other, int chatroom_ID, message_t message);
+    request_broadcast_message(const request_broadcast_message &other);
 
-    int chatroomID() const { return chatroom_ID; }
+    // request_broadcast_message(int chatroom_ID, message_t message);
+
+    int getchatroomID() const { return chatroom_ID; }
     void setChatroomID(int chatroomID) { chatroom_ID = chatroomID; }
 
     message_t getMessage() const { return message; }
@@ -127,14 +135,19 @@ class request_private_message : public request
 {
     // valid request_t : PRIVATE_MESSAGE
 private:
-    int user_id;
+    id user_id;
     message_t message;
 
 public:
-    request_private_message(int user_id, message_t message);
+    request_private_message();
+    request_private_message(id user_id, message_t message);
+    request_private_message(const request &other, id user_id, message_t message);
+    request_private_message(const request_private_message &other);
 
-    int userId() const { return user_id; }
-    void setUserId(int userId) { user_id = userId; }
+    // request_private_message(id user_id, message_t message);
+
+    id getuserId() const { return user_id; }
+    void setUserId(id userId) { user_id = userId; }
 
     message_t getMessage() const { return message; }
     void setMessage(const message_t &message_) { message = message_; }
@@ -146,6 +159,10 @@ class request_disconnect : public request
     // valid request_t : DISCONNECT
 public:
     request_disconnect();
+    request_disconnect(const request &other);
+    request_disconnect(const request_disconnect &other);
+
+    // request_disconnect();
     friend ostream &operator<<(ostream &os, const request_disconnect &req);
 };
 
