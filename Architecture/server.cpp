@@ -38,13 +38,20 @@ void *listeningThread(void *IC)
         ssize_t valread = recv(*incomingSocket, buffer, sizeof(buffer), MSG_WAITALL);
         cout << "received" << buffer << '\n';
         bool flag = false;
-        if (socketToName.find(*incomingSocket) != socketToName.end())
-            flag = true;
+        if (socketToName.find(*incomingSocket) != socketToName.end()) flag = true;
+        cout << "here2\n"; cout.flush();
+        cout.flush();
         string string_buffer = (string)buffer;
+        cout << "here3\n"; cout.flush();
         request_t type = coder::get_encode_request_type(string_buffer);
+        cout << "here4\n"; cout.flush();
         queueMutex.lock();
+        cout << "here5\n"; cout.flush();
+        cout << type << '\n';
         if (type == connect_CR)
         {
+            cout << "here";
+            cout.flush();
             request_connect req = coder::decode_request_connect(string_buffer);
             if (flag)
                 req.getFrom() = socketToName[*incomingSocket];
@@ -110,6 +117,9 @@ void *listeningThread(void *IC)
         {
             queueMutex.unlock();
             break; // when disonnecting, reach pthread_exit to kill the thread
+        }
+        else{
+            cout << "here6\n";
         }
         queueMutex.unlock();
         
@@ -460,12 +470,10 @@ void disconnectRequest(request_disconnect req)
 
 void *workingThread(void *index)
 { // no input taken here
-
     while (true)
-    {
-
+    {   
         sem_wait(&work); // only to avoid bounded waiting
-
+        
         queueMutex.lock();
         request *req = q.front();
         q.pop();
@@ -473,6 +481,8 @@ void *workingThread(void *index)
 
         if (req->getrequestId() == connect_CR)
         {
+            cout << "Ana hone";
+            cout.flush();
             request_connect *reqn = (request_connect *)req;
             connectRequest(*reqn);
         }
@@ -522,14 +532,15 @@ void *workingThread(void *index)
 int main()
 {
 
-    pthread_t threads[1000];
+    pthread_t threads[100];
     pthread_t wThreads[30];
-    sem_init(&work,0,1);
+    sem_init(&work,0,0);
 
     for(int i = 0 ; i < 30; i++){
         int err = pthread_create( &wThreads[i], NULL, workingThread, NULL ) ;
         if( err != 0 ) cout << " something is wrong working thread ";
     }
+
 
     int serverSocket = socket(AF_INET, SOCK_STREAM, 0);
     struct sockaddr_in serverAddress;
@@ -543,6 +554,7 @@ int main()
         exit(EXIT_FAILURE);
     }
     // Giving the socket the capacity to listent to incoming communication
+
     if (listen(serverSocket, 20) < 0)
     {
         // handling potential error

@@ -8,10 +8,12 @@
 #include <ctime>
 #include <mutex>
 #include <semaphore.h>
-#include "Architecture/headers/structures.h"
-#include "Architecture/headers/utilities.h"
-#include "Architecture/headers/request.h"
-#include "Architecture/headers/reply.h"
+#include<arpa/inet.h>
+#include "headers/structures.h"
+#include "headers/utilities.h"
+#include "headers/request.h"
+#include "headers/reply.h"
+#include "headers/coder.h"
 using namespace std;
 
 
@@ -26,9 +28,9 @@ void * listening( void * IS ){
     while( true ){
 
         char buffer[ 1024 ] = { 0 };
-        ssize_t valread = recv(incomingSocket, buffer, sizeof(buffer), MSG_WAITALL);
+        ssize_t valread = recv(*clientSocket, buffer, sizeof(buffer), MSG_WAITALL);
         string string_buffer = (string) buffer;
-        reply rep = decode(buffer);
+        cout << coder::get_encode_reply_type(string_buffer) << '\n';
         //handle reply
 
     }
@@ -36,7 +38,6 @@ void * listening( void * IS ){
 
 
 
-void connect
 
 
 
@@ -60,35 +61,41 @@ void * sending( void * IS ){
 
 int main(){
 
-    pthread listeningThread;
-    pthread sendingThread;
+    pthread_t listeningThread;
+    pthread_t sendingThread;
 
     string nameHandle;
     cout << "Specify Username Please: "; cin >> nameHandle;
+
     int clientSocket ;
     if( ( clientSocket = (clientSocket = socket(AF_INET, SOCK_STREAM, 0) ) ) < 0 );
-    struct sockaddr_in clientAddress;
-    socklen_t addrlen = sizeof(clientAddress);
+    struct sockaddr_in serverAddress;
+    socklen_t addrlen = sizeof(serverAddress);
 
-    clientAddress.sin_family = AF_INET;
-    clientAddress.sin_addr.s_addr = INADDR_ANY;
+    serverAddress.sin_family = AF_INET;
+    serverAddress.sin_addr.s_addr = INADDR_ANY;
     serverAddress.sin_port = htons(8080);
 
-    if ( inet_pton( AF_INET, "127.0.0.1", &clientAddress.sin_addr ) <= 0 ){
+    if ( inet_pton( AF_INET, "127.0.0.1", &serverAddress.sin_addr ) <= 0 ){
         cout << "Invalid" << '\n';
         return -1;
     }
 
-    
-    if( ( status = connect( clientSocket, (struct sockaddr*) &clientAddress ), sizeof(client) ) < 0  ){
+    int status;
+    if( ( status = connect( clientSocket, (struct sockaddr*) &serverAddress , sizeof(serverAddress) ) ) < 0  ){
         cout << status << '\n';
         perror("Connection error");
         return -1;
     }
 
-
-    send(clientSocket, hello, strlen(hello), 0);
-
+    request_connect req(nameHandle);
+    // req.setFrom(nameHandle);
+    // req.setReqType(connect_CR);
+    // req.setRequestId(0);
+    // req.setUserName(nameHandle);
+    cout << req << '\n';
+    string string_buffer = coder::encode_request_connect(req);
+    send(clientSocket, string_buffer.c_str(), string_buffer.size(), 0);
     pthread_create( &listeningThread, NULL, listening, &clientSocket);
     pthread_create( &sendingThread, NULL, sending, &clientSocket );
 
