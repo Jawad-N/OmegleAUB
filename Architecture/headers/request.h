@@ -11,6 +11,7 @@ class request
 {
 private:
     int request_id;
+    int socket_fd;
     request_t req_type;
     string from;
 
@@ -42,6 +43,9 @@ public:
 
     string getFrom() const;
     void setFrom(const string &from_);
+
+    int getSocket() const;
+    void setSocket(int socketFd);
 
     friend ostream &operator<<(ostream &os, const request &req);
 };
