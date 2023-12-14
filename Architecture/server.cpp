@@ -35,7 +35,11 @@ void *listeningThread(void *IC)
     {
 
         char buffer[1024] = {0};
-        ssize_t valread = recv(*incomingSocket, buffer, sizeof(buffer), MSG_WAITALL);
+        int valread = 0;
+        while( ( valread = read(*incomingSocket, buffer, sizeof(buffer)) ) == 0 ){
+        1==1;
+        }
+        cout << typeid(valread).name() << '\n';
         cout << "received" << buffer << '\n';
         bool flag = false;
         if (socketToName.find(*incomingSocket) != socketToName.end()) flag = true;
@@ -50,67 +54,69 @@ void *listeningThread(void *IC)
         cout << type << '\n';
         if (type == connect_CR)
         {
-            cout << "here";
+            cout << "here\n";
             cout.flush();
             request_connect req = coder::decode_request_connect(string_buffer);
-            if (flag)
-                req.getFrom() = socketToName[*incomingSocket];
+            req.setSocket( *incomingSocket );
+            cout << "Here\n";
+            if (flag) req.getFrom() = socketToName[*incomingSocket];
             q.push(&req);
+            cout << "Here9\n";
         }
         else if (type == list_CR)
         {
             request_list req = coder::decode_request_list(string_buffer);
-            if (flag)
-                req.getFrom() = socketToName[*incomingSocket];
+            req.setSocket( *incomingSocket );
+            if (flag) req.getFrom() = socketToName[*incomingSocket];
             q.push(&req);
         }
         else if (type == create_CR)
         {
             request_create_CR req = coder::decode_request_create_CR(string_buffer);
-            if (flag)
-                req.getFrom() = socketToName[*incomingSocket];
+            req.setSocket( *incomingSocket );
+            if (flag) req.getFrom() = socketToName[*incomingSocket];
             q.push(&req);
         }
         else if (type == join_CR)
         {
             request_JLD_CR req = coder::decode_request_JLD_CR(string_buffer);
-            if (flag)
-                req.getFrom() = socketToName[*incomingSocket];
+            req.setSocket( *incomingSocket );
+            if (flag) req.getFrom() = socketToName[*incomingSocket];
             q.push(&req);
         }
         else if (type == leave_CR)
         {
             request_JLD_CR req = coder::decode_request_JLD_CR(string_buffer);
-            if (flag)
-                req.getFrom() = socketToName[*incomingSocket];
+            req.setSocket( *incomingSocket );
+            if (flag) req.getFrom() = socketToName[*incomingSocket];
             q.push(&req);
         }
         else if (type == delete_CR)
         {
             request_JLD_CR req = coder::decode_request_JLD_CR(string_buffer);
-            if (flag)
-                req.getFrom() = socketToName[*incomingSocket];
+            req.setSocket( *incomingSocket );
+            if (flag) req.getFrom() = socketToName[*incomingSocket];
             q.push(&req);
         }
         else if (type == BROADCAST_MESSAGE)
         {
             request_broadcast_message req = coder::decode_request_broadcast_message(string_buffer);
-            if (flag)
-                req.getFrom() = socketToName[*incomingSocket];
+            req.setSocket( *incomingSocket );
+            if (flag) req.getFrom() = socketToName[*incomingSocket];
             q.push(&req);
         }
         else if (type == list_users)
         {
             request_list req = coder::decode_request_list(string_buffer);
-            if (flag)
-                req.getFrom() = socketToName[*incomingSocket];
+            req.setSocket( *incomingSocket );
+            if (flag) req.getFrom() = socketToName[*incomingSocket];
             q.push(&req);
         }
         else if (type == PRIVATE_MESSAGE)
         {
             request_private_message req = coder::decode_request_private_message(string_buffer);
-            if (flag)
-                req.getFrom() = socketToName[*incomingSocket];
+            req.setSocket( *incomingSocket );
+            if (flag) req.getFrom() = socketToName[*incomingSocket];
             q.push(&req);
         }
         else if (type == DISCONNECT)
@@ -139,8 +145,8 @@ void connectRequest(request_connect req)
     reply_connect rep;
 
     try
-    {
-        if (nameToSocket.find(req.getuserName()) == nameToSocket.end())
+    {   
+        if (nameToSocket.find(req.getuserName()) != nameToSocket.end())
         {
             rep.setReplyId(req.getrequestId());
             rep.setRepType(connect_CR);
@@ -164,7 +170,8 @@ void connectRequest(request_connect req)
         rep.setStatus(500);
         rep.setServerMessage("Could not connect succesfully");
     }
-
+    cout << req.getSocket()  << '\n';
+    cout << rep <<'\n';
     string string_buffer = coder::encode_reply_connect(rep);
     send(req.getSocket(), string_buffer.c_str(), string_buffer.size(), 0);
 }
@@ -473,55 +480,56 @@ void *workingThread(void *index)
     while (true)
     {   
         sem_wait(&work); // only to avoid bounded waiting
-        
+        cout << "balash el she8el\n";
         queueMutex.lock();
         request *req = q.front();
         q.pop();
         queueMutex.unlock();
 
-        if (req->getrequestId() == connect_CR)
+        if (req->getreqType() == connect_CR)
         {
-            cout << "Ana hone";
+            cout << "Ana hone\n";
             cout.flush();
             request_connect *reqn = (request_connect *)req;
             connectRequest(*reqn);
+            cout << "Ana after\n";
         }
-        else if (req->getrequestId() == list_CR)
+        else if (req->getreqType() == list_CR)
         {
             request_list *reqn = (request_list *)req;
             listRequest(*reqn);
         }
-        else if (req->getrequestId() == create_CR)
+        else if (req->getreqType() == create_CR)
         {
             request_create_CR *reqn = (request_create_CR *)req;
             createRequest(*reqn);
         }
-        else if (req->getrequestId() == join_CR)
+        else if (req->getreqType() == join_CR)
         {
             request_JLD_CR *reqn = (request_JLD_CR *)req;
             joinRequest(*reqn);
         }
-        else if (req->getrequestId() == leave_CR)
+        else if (req->getreqType() == leave_CR)
         {
             request_JLD_CR *reqn = (request_JLD_CR *)req;
             leaveRequest(*reqn);
         }
-        else if (req->getrequestId() == delete_CR)
+        else if (req->getreqType() == delete_CR)
         {
             request_JLD_CR *reqn = (request_JLD_CR *)req;
             deleteRequest(*reqn);
         }
-        else if (req->getrequestId() == BROADCAST_MESSAGE)
+        else if (req->getreqType() == BROADCAST_MESSAGE)
         {
             request_broadcast_message *reqn = (request_broadcast_message *)req;
             broadcastRequest(*reqn);
         }
-        else if (req->getrequestId() == list_users)
+        else if (req->getreqType() == list_users)
         {
             request_list *reqn = (request_list *)req;
             listUsersRequest(*reqn);
         }
-        else if (req->getrequestId() == DISCONNECT)
+        else if (req->getreqType() == DISCONNECT)
         {
             request_disconnect *req = (request_disconnect *)req;
             disconnectRequest(*req);

@@ -24,15 +24,46 @@ id name;
 
 
 void * listening( void * IS ){
+    cout << "listening\n"; cout.flush();
     int *clientSocket = (int*) IS;
     while( true ){
-
         char buffer[ 1024 ] = { 0 };
-        ssize_t valread = recv(*clientSocket, buffer, sizeof(buffer), MSG_WAITALL);
+        ssize_t valread = 0 ;
+        cout << "pre: " << valread << '\n';
+        cout.flush();
+        valread = read( *clientSocket, buffer, sizeof(buffer) );
+        cout << "post: " << valread << '\n';
+        cout.flush();
         string string_buffer = (string) buffer;
-        cout << coder::get_encode_reply_type(string_buffer) << '\n';
-        //handle reply
-
+        request_t type = typecoder::get_encode_reply_type(string_buffer);
+        if( type == connect_CR ){
+            cout << coder::decode_reply_connect( string_buffer ) << '\n';
+        }
+        else if( type == list_CR ){
+            cout << coder::decode_reply_list_CR( string_buffer ) << '\n';
+        }
+        else if( type == create_CR ){
+            cout << coder::decode_reply_create_CR( string_buffer ) << '\n';
+        }
+        else if( type == join_CR ){
+            cout << coder::decode_reply_JLD_CR( string_buffer ) << '\n';
+        }
+        else if( type == leave_CR ){
+            cout << coder::decode_reply_JLD_CR( string_buffer ) << '\n';
+        }
+        else if( type == delete_CR ){
+            cout << coder::decode_reply_JLD_CR( string_buffer ) << '\n';
+        }
+        else if( type == BROADCAST_MESSAGE ){
+            cout << coder::decode_reply_broadcast_message( string_buffer ) << '\n';
+        }
+        else if( type == list_users ){
+            cout << coder::decode_reply_list_users( string_buffer ) << '\n';
+        }
+        else if( type == PRIVATE_MESSAGE ){
+            cout << coder::decode_reply_private_message( string_buffer ) << '\n';
+        }
+        cout.flush();
     }
 }
 
@@ -46,6 +77,14 @@ void * listening( void * IS ){
 void * sending( void * IS ){
     
     int * clientScoket = ( int* ) IS;
+    
+    assume we have the type and the request elements
+
+    try{
+
+        
+    }
+
     
  
 }
@@ -89,16 +128,13 @@ int main(){
     }
 
     request_connect req(nameHandle);
-    // req.setFrom(nameHandle);
-    // req.setReqType(connect_CR);
-    // req.setRequestId(0);
-    // req.setUserName(nameHandle);
-    cout << req << '\n';
     string string_buffer = coder::encode_request_connect(req);
     send(clientSocket, string_buffer.c_str(), string_buffer.size(), 0);
     pthread_create( &listeningThread, NULL, listening, &clientSocket);
-    pthread_create( &sendingThread, NULL, sending, &clientSocket );
-
+    // pthread_create( &sendingThread, NULL, sending, &clientSocket );
+    void * status2;
+    pthread_join(listeningThread, &status2);
+    pthread_join(sendingThread, &status2);
 
 
     return 0;
