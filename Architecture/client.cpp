@@ -33,6 +33,15 @@ void * listening( void * IS ){
 
     }
 }
+
+
+
+void connect
+
+
+
+
+
 void * sending( void * IS ){
     
     int * clientScoket = ( int* ) IS;
@@ -46,11 +55,14 @@ void * sending( void * IS ){
 
 
 
+
+
+
 int main(){
 
     pthread listeningThread;
     pthread sendingThread;
-
+    
 
     int clientSocket ;
     if( ( clientSocket = (clientSocket = socket(AF_INET, SOCK_STREAM, 0) ) ) < 0 );
@@ -60,7 +72,6 @@ int main(){
     clientAddress.sin_family = AF_INET;
     clientAddress.sin_addr.s_addr = INADDR_ANY;
     serverAddress.sin_port = htons(8080);
-
 
     if ( inet_pton( AF_INET, "127.0.0.1", &clientAddress.sin_addr ) <= 0 ){
         cout << "Invalid" << '\n';
@@ -76,7 +87,6 @@ int main(){
 
 
     send(clientSocket, hello, strlen(hello), 0);
-    cout << "Hello sent\n" << '\n';
 
     pthread_create( &listeningThread, NULL, listening, &clientSocket);
     pthread_create( &sendingThread, NULL, sending, &clientSocket );

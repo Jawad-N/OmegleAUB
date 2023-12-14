@@ -4,16 +4,16 @@
 #include <stdlib.h>
 #include <sys/socket.h>
 #include <unistd.h>
-#include <chrono>
-#include <ctime>
-#include <mutex>
-#include <semaphore.h>
-// #include "Semaphore.h"
-#include "headers/structures.h"
-#include "headers/utilities.h"
-#include "headers/request.h"
-#include "headers/reply.h"
-#include "headers/coder.h"
+#include<chrono>
+#include<ctime>
+#include<mutex>
+#include<semaphore.h>
+#include<semaphore>
+#include"headers/structures.h"
+#include"headers/utilities.h"
+#include"headers/request.h"
+#include"headers/reply.h"
+#include"headers/coder.h"
 using namespace std;
 
 int userCounter = 0;
@@ -23,7 +23,7 @@ vector<int> sockets; // sockets are filedescriptors, id is the index of the vect
 
 queue<request *> q;
 mutex queueMutex;
-counting_semaphore<int> work(0);
+sem_t work;
 
 map<string, int> nameToSocket;
 map<int, string> socketToName;
@@ -112,8 +112,11 @@ void *listeningThread(void *IC)
             break; // when disonnecting, reach pthread_exit to kill the thread
         }
         queueMutex.unlock();
+        
+        sem_post(&work); // to signal a working thread to start working
 
-        work.release(); // to signal a working thread to start working
+        
+
     }
 
     close(*incomingSocket);
@@ -455,7 +458,7 @@ void *workingThread(void *index)
     while (true)
     {
 
-        work.acquire(); // only to avoid bounded waiting
+        sem_wait(&work); // only to avoid bounded waiting
 
         queueMutex.lock();
         request *req = q.front();
@@ -515,12 +518,11 @@ int main()
 
     pthread_t threads[1000];
     pthread_t wThreads[30];
+    sem_init(&work,0,1);
 
-    for (int i = 0; i < 30; i++)
-    {
-        int err = pthread_create(&wThreads[i], NULL, workingThread, NULL);
-        if (err != 0)
-            cout << " something is wrong working thread ";
+    for(int i = 0 ; i < 30; i++){
+        int err = pthread_create( &wThreads[i], NULL, workingThread, NULL ) ;
+        if( err != 0 ) cout << " something is wrong working thread ";
     }
 
     int serverSocket = socket(AF_INET, SOCK_STREAM, 0);
@@ -562,6 +564,6 @@ int main()
         // make a reply containing chat rooms available
         // available rooms sent
     }
-
+    sem_destroy(&work);
     return 0;
 }
