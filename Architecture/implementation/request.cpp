@@ -19,6 +19,7 @@ request::request()
     this->req_type = connect_CR;
     this->request_id = -1;
     this->from = "";
+    setSocket(-1);
 }
 
 request::request(request_t req_type)
@@ -27,6 +28,7 @@ request::request(request_t req_type)
     this->req_type = req_type;
     this->request_id = counter;
     this->from = "";
+    setSocket(-1);
 }
 
 request::request(const request &other)
@@ -34,6 +36,7 @@ request::request(const request &other)
     this->req_type = other.getreqType();
     this->request_id = other.getrequestId();
     this->from = other.getFrom();
+    setSocket(other.getSocket());
 }
 
 int request::getrequestId() const { return request_id; }
@@ -45,11 +48,15 @@ void request::setReqType(const request_t &reqType) { req_type = reqType; }
 string request::getFrom() const { return from; }
 void request::setFrom(const string &from_) { from = from_; }
 
+int request::getSocket() const { return socket_fd; }
+void request::setSocket(int socketFd) { socket_fd = socketFd; }
+
 ostream &operator<<(ostream &os, const request &req)
 {
     os << "Request ID   : " << req.getrequestId() << "\n";
     os << "Request type : " << request::request_mapper[req.getreqType()] << '\n';
     os << "From         : " << req.getFrom() << '\n';
+    os << "Socket       : " << req.getSocket() << '\n';
     return os;
 }
 

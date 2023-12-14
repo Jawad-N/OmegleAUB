@@ -287,42 +287,52 @@ reply_disconnect coder::decode_reply_disconnect(string rep_str)
     return reply_connect(main_reply);
 }
 
-string encode_reply_list_CR(reply_list_CR rep)
+string coder::encode_reply_list_CR(reply_list_CR rep)
 {
     // encoding scheme : reply sep_req_repl item1 sep_req_repl item2 sep_req_repl item3 sep_req_repl … sep_req_repl itemK sep_req_repl
     string chatrooms_encoding = "";
     vector<chatroom_t> chatrooms = rep.getChatrooms();
-    for (size_t index; index < chatrooms.size(); index++)
+    vector<string> chatrooms_encodings(chatrooms.size(), " ");
+    for (int i = 0; i < chatrooms.size(); i++)
     {
-        chatrooms_encoding += coder::encode_chatroom_t(chatrooms[index]);
-        if (index + 1 != chatrooms.size())
-            chatrooms_encoding += coder::sep_req_repl;
+        chatrooms_encodings[i] = coder::encode_chatroom_t(chatrooms[i]);
+        cout << chatrooms_encodings[i] << '\n';
+        chatrooms_encoding += chatrooms_encodings[i];
+        if (i + 1 == chatrooms.size())
+            break;
+        chatrooms_encoding += coder::sep_req_repl;
     }
+    // cout << "\n EncodingReply: " << coder::encode_reply(rep) << '\n';
+    // string encodingS = coder::encode_reply(rep) + coder::sep_req_repl + chatrooms_encoding + coder::sep_req_repl;
+    // vector<string> OKAY = split(encodingS, coder::sep_req_repl);
+    // cout << OKAY.size() << '\n';
+    // cout.flush();
+    // cout << "decoding of encoding: " << coder::decode_reply(OKAY[0]) << '\n';
     return coder::encode_reply(rep) + coder::sep_req_repl + chatrooms_encoding + coder::sep_req_repl;
 }
-reply_list_CR decode_reply_list_CR(string rep_str)
+reply_list_CR coder::decode_reply_list_CR(string rep_str)
 {
-    vector<string> content = split(rep_str, coder::sep_req_repl_main);
+    vector<string> content = split(rep_str, coder::sep_req_repl);
     if (content.size() < 1)
         throw runtime_error("[server] : invalid reply_list_CR encoding. Encoding: " + rep_str);
+
     reply main_reply = coder::decode_reply(content[0]);
     vector<chatroom_t> chatrooms;
-    for (size_t index; index < content.size(); index++)
+    for (size_t index = 1; index < content.size(); index++)
     {
         chatrooms.emplace_back(coder::decode_chatroom_t(content[index]));
     }
     reply_list_CR rep(main_reply, chatrooms);
-    // add try catch blocks
-
+    // add try catch block
     return rep;
 }
 
-string encode_reply_create_CR(reply_create_CR rep)
+string coder::encode_reply_create_CR(reply_create_CR rep)
 {
     // reply sep_req_repl chatroom sep_req_repl
     return coder::encode_reply(rep) + coder::sep_req_repl + coder::encode_chatroom_t(rep.getChatroom()) + coder::sep_req_repl;
 }
-reply_create_CR decode_reply_create_CR(string rep_str)
+reply_create_CR coder::decode_reply_create_CR(string rep_str)
 {
     vector<string> content = split(rep_str, coder::sep_req_repl);
     if (content.size() != 2)
@@ -386,7 +396,7 @@ string coder::encode_reply_list_users(reply_list_users rep)
 {
     string users_encoding = "";
     vector<id> usrs = rep.getUsers();
-    for (size_t index; index < usrs.size(); index++)
+    for (size_t index = 1; index < usrs.size(); index++)
     {
         users_encoding += usrs[index];
         if (index + 1 != usrs.size())
@@ -396,12 +406,12 @@ string coder::encode_reply_list_users(reply_list_users rep)
 }
 reply_list_users coder::decode_reply_list_users(string rep_str)
 {
-    vector<string> content = split(rep_str, coder::sep_req_repl_main);
+    vector<string> content = split(rep_str, coder::sep_req_repl);
     if (content.size() < 1)
         throw runtime_error("[server] : invalid reply_list_CR encoding. Encoding: " + rep_str);
     reply main_reply = coder::decode_reply(content[0]);
     vector<id> users;
-    for (size_t index; index < content.size(); index++)
+    for (size_t index = 1; index < content.size(); index++)
     {
         users.emplace_back(content[index]);
     }
@@ -413,6 +423,36 @@ reply_list_users coder::decode_reply_list_users(string rep_str)
 // // // // // Coder (reply's version) end // // // // // //
 
 // // // // // main_encoding_decoding_start // // // // // //
+
+request_t coder::get_encode_request_type(string req_str)
+{
+    vector<string> content = split(req_str, coder::sep_req_repl);
+    if (content.size() == 0)
+        throw runtime_error("[server] : invalid req_str encoding inside get_encode_request_type");
+    request main_req = coder::decode_request(content[0]);
+    return main_req.getreqType();
+}
+request_t coder::get_encode_reply_type(string rep_str)
+{
+    vector<string> content = split(rep_str, coder::sep_req_repl);
+    if (content.size() == 0)
+        throw runtime_error("[server] : invalid req_str encoding inside get_encode_request_type");
+    reply main_rep = coder::decode_reply(content[0]);
+    return main_rep.getrepType();
+}
+
+string coder::get_request_t_str(request req)
+{
+    return request::request_mapper[req.getreqType()];
+}
+string coder::get_request_t_str(reply rep)
+{
+    return request::request_mapper[rep.getrepType()];
+}
+string coder::get_request_t_str(request_t req_type)
+{
+    return request::request_mapper[req_type];
+}
 // string coder::main_encode_request(request req)
 // {
 //     switch (req.getreqType())

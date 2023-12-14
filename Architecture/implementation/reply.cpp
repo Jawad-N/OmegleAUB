@@ -221,14 +221,14 @@ void reply_broadcast_message::setMessage(const message_t &message_) { message = 
 
 ostream &operator<<(ostream &os, const reply_broadcast_message &rep)
 {
-    os << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -";
+    os << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -\n";
     os << static_cast<const reply &>(rep);
     os << "Chatroom id     : " << rep.getChatroomId() << '\n';
     os << "- - - - - - - - - - - - - - \n";
     os << "Message         : \n";
     os << rep.getMessage() << '\n';
     os << "- - - - - - - - - - - - - - \n";
-    os << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -";
+    os << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -\n";
     return os;
 }
 // // // // Main reply_broadcast_message class end // // // //
@@ -264,14 +264,14 @@ void reply_private_message::setMessage(const message_t &message_) { message = me
 
 ostream &operator<<(ostream &os, const reply_private_message &rep)
 {
-    os << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -";
+    os << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -\n";
     os << static_cast<const reply &>(rep);
     os << "User     id     : " << rep.getreplyId() << '\n';
     os << "- - - - - - - - - - - - - - \n";
     os << "Message         : \n";
     os << rep.getMessage() << '\n';
     os << "- - - - - - - - - - - - - - \n";
-    os << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -";
+    os << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -\n";
     return os;
 }
 // // // // Main reply_private_message class end // // // //
@@ -301,7 +301,7 @@ void reply_list_users::setUsers(const vector<id> &users_) { users = users_; }
 
 ostream &operator<<(ostream &os, const reply_list_users &rep)
 {
-    os << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -";
+    os << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -\n";
     os << static_cast<const reply &>(rep);
     os << "- - - - - - - - - - - - - - \n";
     os << "User     ids    : \n";
@@ -313,7 +313,7 @@ ostream &operator<<(ostream &os, const reply_list_users &rep)
     }
     os << "- - - - - - - - - - - - - - \n";
 
-    os << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -";
+    os << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -\n";
     return os;
 }
 // // // // Main reply_list_users class end // // // //

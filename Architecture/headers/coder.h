@@ -177,11 +177,19 @@ public:
      * @brief Now for the main encoding and decoding functions
      *
      */
+
+    // Split and check the rep_type attribute.
+    static request_t get_encode_request_type(string req_str);
+    static request_t get_encode_reply_type(string rep_str);
+
+    static string get_request_t_str(request req);
+    static string get_request_t_str(reply rep);
+    static string get_request_t_str(request_t req_type);
     // static string main_encode_request(request req);
     // static request main_decode_request(string req_str);
 
     // static string main_encode_reply(reply rep);
     // static reply main_decode_reply(string rep_str);
 };
-
+// request_t
 // request_connect , request_list,request_create_CR,request_JLD_CR,request_broadcast_message,request_private_message,request_disconnect
