@@ -14,10 +14,6 @@
 #include "Architecture/headers/reply.h"
 using namespace std;
 
-<<<<<<< HEAD
-int main()
-{
-=======
 
 set<int> chatrooms;
 set<id> users;
@@ -51,13 +47,10 @@ void * sending( void * IS ){
 
 
 int main(){
->>>>>>> a91de25123cc0595d7ccacd48adc216933027785
 
     pthread listeningThread;
     pthread sendingThread;
 
-<<<<<<< HEAD
-=======
 
     int clientSocket ;
     if( clientSocket = (clientSocket = socket(AF_INET, SOCK_STREAM, 0) ) < 0 );
@@ -87,6 +80,5 @@ int main(){
 
 
 
->>>>>>> a91de25123cc0595d7ccacd48adc216933027785
     return 0;
 }

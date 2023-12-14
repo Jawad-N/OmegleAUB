@@ -41,16 +41,6 @@ map< string, int > nameToSocket;
 map< int, string > socketToName;
 
 
-class request{
-    public:
-
-};
-
-
-class requestConnect : public request{
-    
-
-};
 
 struct msg
 {
