@@ -88,7 +88,7 @@ ostream &operator<<(std::ostream &os, const chatroom_t &chatroom)
 bool chatroom_t::operator<(const chatroom_t& other) const {
     // Define your comparison logic here
     // For example, compare based on chatroom ID or other relevant attributes
-    return chatroomID < other.getchatroomID();
+    return getchatroomID() < other.getchatroomID();
 }
 
 message_t::message_t()

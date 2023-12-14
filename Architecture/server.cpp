@@ -8,6 +8,7 @@
 #include<ctime>
 #include<mutex>
 #include<semaphore.h>
+#include<semaphore>
 #include"headers/structures.h"
 #include"headers/utilities.h"
 #include"headers/request.h"
@@ -25,7 +26,7 @@ vector<int> sockets; // sockets are filedescriptors, id is the index of the vect
 
 queue<request*> q;
 mutex queueMutex;
-counting_semaphore<int> work(0);
+sem_t work;
 
 map< string, int > nameToSocket;
 map< int, string > socketToName;
@@ -87,7 +88,7 @@ void * listeningThread( void * IC ){
         }
         queueMutex.unlock();
         
-        work.release(); // to signal a working thread to start working
+        sem_post(&work); // to signal a working thread to start working
 
         
 
@@ -387,7 +388,7 @@ void * workingThread( void * index ){ // no input taken here
 
     while(true){
 
-        work.acquire(); // only to avoid bounded waiting
+        sem_wait(&work); // only to avoid bounded waiting
 
         queueMutex.lock();
         request * req = q.front();
@@ -440,7 +441,7 @@ int main()
 
     pthread_t threads[1000];
     pthread_t wThreads[30];
-
+    sem_init(&work,0,1);
 
     for(int i = 0 ; i < 30; i++){
         int err = pthread_create( &wThreads[i], NULL, workingThread, NULL ) ;
@@ -485,6 +486,6 @@ int main()
         // make a reply containing chat rooms available
         // available rooms sent
     }
-
+    sem_destroy(&work);
     return 0;
 }
