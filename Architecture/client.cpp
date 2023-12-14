@@ -53,12 +53,13 @@ int main(){
 
 
     int clientSocket ;
-    if( clientSocket = (clientSocket = socket(AF_INET, SOCK_STREAM, 0) ) < 0 );
+    if( ( clientSocket = (clientSocket = socket(AF_INET, SOCK_STREAM, 0) ) ) < 0 );
     struct sockaddr_in clientAddress;
     socklen_t addrlen = sizeof(clientAddress);
 
     clientAddress.sin_family = AF_INET;
     clientAddress.sin_addr.s_addr = INADDR_ANY;
+    serverAddress.sin_port = htons(8080);
 
 
     if ( inet_pton( AF_INET, "127.0.0.1", &clientAddress.sin_addr ) <= 0 ){
@@ -68,15 +69,17 @@ int main(){
 
     
     if( ( status = connect( clientSocket, (struct sockaddr*) &clientAddress ), sizeof(client) ) < 0  ){
-        cout << "Invalid2" << '\n';
+        cout << status << '\n';
+        perror("Connection error");
+        return -1;
     }
 
 
     send(clientSocket, hello, strlen(hello), 0);
     cout << "Hello sent\n" << '\n';
 
-    pthread_create( &listeningThread, NULL, listening, &clientSocket)
-
+    pthread_create( &listeningThread, NULL, listening, &clientSocket);
+    pthread_create( &sendingThread, NULL, sending, &clientSocket );
 
 
 
