@@ -183,3 +183,296 @@ request_create_CR coder::decode_request_create_CR(string req_str)
     req.setChatroom(chatroom);
     return req;
 }
+
+string coder::encode_request_JLD_CR(request_JLD_CR req)
+{
+    // Encoding scheme : request sep_req_repl chatroom_id sep_req_repl
+    return coder::encode_request(req) + coder::sep_req_repl + to_string(req.getchatroomID()) + coder::sep_req_repl;
+}
+request_JLD_CR coder::decode_request_JLD_CR(string req_str)
+{
+    vector<string> content = split(req_str, coder::sep_req_repl);
+    if (content.size() != 2)
+        throw runtime_error("[server] :  invalid encoding for request_JLD_CR. Request : " + req_str);
+    // Try except
+    // Realisation : incosistency in classes reperesentation.
+    request main_req = coder::decode_request(content[0]);
+    int chatroom_id = stoi(content[1]);
+    request_JLD_CR req(main_req, chatroom_id);
+    return req;
+}
+
+string coder::encode_request_broadcast_message(request_broadcast_message req)
+{
+    // request sep_req_repl chatroom_id sep_req_repl encode_message_t(message) sep_req_repl
+    return coder::encode_request(req) + coder::sep_req_repl + to_string(req.getchatroomID()) +
+           coder::sep_req_repl + coder::encode_message_t(req.getMessage()) + coder::sep_req_repl;
+}
+request_broadcast_message coder::decode_request_broadcast_message(string req_str)
+{
+    vector<string> content = split(req_str, coder::sep_req_repl);
+    if (content.size() != 3)
+        throw runtime_error("[server] :  invalid encoding for request_broadcast_message. Request : " + req_str);
+
+    // Try except
+    request main_req = coder::decode_request(content[0]);
+    int chatroom_id = stoi(content[1]);
+    message_t message = coder::decode_message_t(content[2]);
+    return request_broadcast_message(main_req, chatroom_id, message);
+}
+
+string coder::encode_request_private_message(request_private_message req)
+{
+    // request sep_req_repl user_id sep_req_repl encode_message_t(message) sep_req_repl
+
+    return coder::encode_request(req) + coder::sep_req_repl + req.getuserId() +
+           coder::sep_req_repl + coder::encode_message_t(req.getMessage()) + coder::sep_req_repl;
+}
+request_private_message coder::decode_request_private_message(string req_str)
+{
+    vector<string> content = split(req_str, coder::sep_req_repl);
+    if (content.size() != 3)
+        throw runtime_error("[server] :  invalid encoding for request_private_message. Request : " + req_str);
+
+    // Try except
+    request main_req = coder::decode_request(content[0]);
+    id user_id = content[1];
+    message_t message = coder::decode_message_t(content[2]);
+    return request_private_message(main_req, user_id, message);
+}
+
+// // // // // // Coder (reply's version) // // // // // //
+
+string coder::encode_reply(reply rep)
+{
+    // encoding scheme: rep_type sep_req_repl_main reply_id sep_req_repl_main status sep_req_repl_main server_message sep_req_repl_main
+    return to_string((int)rep.getrepType()) + coder::sep_req_repl_main + to_string(rep.getreplyId()) + coder::sep_req_repl_main +
+           to_string(rep.getStatus()) + coder::sep_req_repl_main + rep.getserverMessage() + coder::sep_req_repl_main;
+}
+
+reply coder::decode_reply(string rep_str)
+{
+    vector<string> content = split(rep_str, coder::sep_req_repl_main);
+    if (content.size() != 4)
+        throw runtime_error("[server] : invalid reply encoding. Encoding: " + rep_str);
+    reply main_reply;
+    // add try catch blocks
+    main_reply.setRepType((request_t)stoi(content[0]));
+    main_reply.setReplyId(stoi(content[1]));
+    main_reply.setStatus(stoi(content[2]));
+    main_reply.setServerMessage(content[3]);
+
+    return main_reply;
+}
+
+string coder::encode_reply_connect(reply_connect rep)
+{
+    // encoding scheme : reply
+    return encode_reply(rep);
+}
+reply_connect coder::decode_reply_connect(string rep_str)
+{
+    reply main_reply = decode_reply(rep_str);
+    return reply_connect(main_reply);
+}
+
+string coder::encode_reply_disconnect(reply_disconnect rep)
+{
+    // encoding scheme : reply
+    return encode_reply(rep);
+}
+reply_disconnect coder::decode_reply_disconnect(string rep_str)
+{
+    reply main_reply = decode_reply(rep_str);
+    return reply_connect(main_reply);
+}
+
+string encode_reply_list_CR(reply_list_CR rep)
+{
+    // encoding scheme : reply sep_req_repl item1 sep_req_repl item2 sep_req_repl item3 sep_req_repl … sep_req_repl itemK sep_req_repl
+    string chatrooms_encoding = "";
+    vector<chatroom_t> chatrooms = rep.getChatrooms();
+    for (size_t index; index < chatrooms.size(); index++)
+    {
+        chatrooms_encoding += coder::encode_chatroom_t(chatrooms[index]);
+        if (index + 1 != chatrooms.size())
+            chatrooms_encoding += coder::sep_req_repl;
+    }
+    return coder::encode_reply(rep) + coder::sep_req_repl + chatrooms_encoding + coder::sep_req_repl;
+}
+reply_list_CR decode_reply_list_CR(string rep_str)
+{
+    vector<string> content = split(rep_str, coder::sep_req_repl_main);
+    if (content.size() < 1)
+        throw runtime_error("[server] : invalid reply_list_CR encoding. Encoding: " + rep_str);
+    reply main_reply = coder::decode_reply(content[0]);
+    vector<chatroom_t> chatrooms;
+    for (size_t index; index < content.size(); index++)
+    {
+        chatrooms.emplace_back(coder::decode_chatroom_t(content[index]));
+    }
+    reply_list_CR rep(main_reply, chatrooms);
+    // add try catch blocks
+
+    return rep;
+}
+
+string encode_reply_create_CR(reply_create_CR rep)
+{
+    // reply sep_req_repl chatroom sep_req_repl
+    return coder::encode_reply(rep) + coder::sep_req_repl + coder::encode_chatroom_t(rep.getChatroom()) + coder::sep_req_repl;
+}
+reply_create_CR decode_reply_create_CR(string rep_str)
+{
+    vector<string> content = split(rep_str, coder::sep_req_repl);
+    if (content.size() != 2)
+        throw runtime_error("[server] : invalid reply_create_CR encoding. Encoding: " + rep_str);
+    reply main_reply = coder::decode_reply(content[0]);
+    chatroom_t chatroom = coder::decode_chatroom_t(content[1]);
+    return reply_create_CR(main_reply, chatroom);
+}
+
+string coder::encode_reply_JLD_CR(reply_JLD_CR rep)
+{
+    // reply sep_req_repl chatroom_id sep_req_repl
+    return coder::encode_reply(rep) + coder::sep_req_repl + to_string(rep.getChatroomId()) + coder::sep_req_repl;
+}
+reply_JLD_CR coder::decode_reply_JLD_CR(string rep_str)
+{
+    vector<string> content = split(rep_str, coder::sep_req_repl);
+    if (content.size() != 2)
+        throw runtime_error("[server] : invalid reply_JLD_CR encoding. Encoding: " + rep_str);
+    reply main_reply = coder::decode_reply(content[0]);
+    int chatroom_id = stoi(content[1]);
+    return reply_JLD_CR(main_reply, chatroom_id);
+}
+
+string coder::encode_reply_broadcast_message(reply_broadcast_message rep)
+{
+    // reply sep_req_repl chatroom_id sep_req_repl encode_message_t(message) sep_req_repl
+    return coder::encode_reply(rep) + coder::sep_req_repl + to_string(rep.getChatroomId()) + coder::sep_req_repl + coder::encode_message_t(rep.getMessage()) + coder::sep_req_repl;
+}
+reply_broadcast_message coder::decode_reply_broadcast_message(string rep_str)
+{
+    vector<string> content = split(rep_str, coder::sep_req_repl);
+    if (content.size() != 3)
+        throw runtime_error("[server] : invalid reply_broadcast_message encoding. Encoding: " + rep_str);
+
+    reply main_reply = coder::decode_reply(content[0]);
+    int chatroom_id = stoi(content[1]);
+    message_t message = coder::decode_message_t(content[2]);
+    return reply_broadcast_message(main_reply, chatroom_id, message);
+}
+
+string coder::encode_reply_private_message(reply_private_message rep)
+{
+    // reply sep_req_repl user_id sep_req_repl encode_message_t(message) sep_req_repl
+    return coder::encode_reply(rep) + coder::sep_req_repl + rep.getuserId() + coder::sep_req_repl + coder::encode_message_t(rep.getMessage()) + coder::sep_req_repl;
+}
+reply_private_message coder::decode_reply_private_message(string rep_str)
+{
+    vector<string> content = split(rep_str, coder::sep_req_repl);
+    if (content.size() != 3)
+        throw runtime_error("[server] : invalid reply_broadcast_message encoding. Encoding: " + rep_str);
+
+    reply main_reply = coder::decode_reply(content[0]);
+    id user_id = content[1];
+    message_t message = coder::decode_message_t(content[2]);
+
+    return reply_private_message(main_reply, user_id, message);
+}
+
+string coder::encode_reply_list_users(reply_list_users rep)
+{
+    string users_encoding = "";
+    vector<id> usrs = rep.getUsers();
+    for (size_t index; index < usrs.size(); index++)
+    {
+        users_encoding += usrs[index];
+        if (index + 1 != usrs.size())
+            users_encoding += coder::sep_req_repl;
+    }
+    return coder::encode_reply(rep) + coder::sep_req_repl + users_encoding + coder::sep_req_repl;
+}
+reply_list_users coder::decode_reply_list_users(string rep_str)
+{
+    vector<string> content = split(rep_str, coder::sep_req_repl_main);
+    if (content.size() < 1)
+        throw runtime_error("[server] : invalid reply_list_CR encoding. Encoding: " + rep_str);
+    reply main_reply = coder::decode_reply(content[0]);
+    vector<id> users;
+    for (size_t index; index < content.size(); index++)
+    {
+        users.emplace_back(content[index]);
+    }
+    reply_list_users rep(main_reply, users);
+    // add try catch blocks
+
+    return rep;
+}
+// // // // // Coder (reply's version) end // // // // // //
+
+// // // // // main_encoding_decoding_start // // // // // //
+// string coder::main_encode_request(request req)
+// {
+//     switch (req.getreqType())
+//     {
+//     case connect_CR:
+//         return encode_request(req);
+//         break;
+//     case list_CR:
+//         return encode_request_list((request_list)req);
+//         // Handle list_CR
+//         break;
+//     case create_CR:
+//         return encode_request_create_CR((request_create_CR)req);
+//         // Handle create_CR
+//         break;
+//     case join_CR:
+
+//         // Handle join_CR
+//         return encode_request_JLD_CR((request_JLD_CR)req);
+//         break;
+//     case leave_CR:
+//         // Handle leave_CR
+//         return encode_request_JLD_CR((request_JLD_CR)req);
+//         break;
+//     case delete_CR:
+//         // Handle delete_CR
+//         return encode_request_JLD_CR((request_JLD_CR)req);
+//         break;
+//     case BROADCAST_MESSAGE:
+//         // Handle BROADCAST_MESSAGE
+//         return encode_request_broadcast_message((request_broadcast_message)req);
+//         break;
+//     case list_users:
+//         // Handle list_users
+//         return encode_request_list((request_list)req);
+//         break;
+//     case PRIVATE_MESSAGE:
+
+//         // Handle PRIVATE_MESSAGE
+//         return encode_request_private_message((request_private_message)req);
+//         break;
+//     case DISCONNECT:
+//         // Handle DISCONNECT
+//         // Add request disconnect
+//         return "";
+//         break;
+//     case connect_USR:
+//         // Handle connect_USR
+//         // return encode_req //
+//         return encode_request_connect((request_connect)req);
+//         break;
+//     default:
+//         // Handle invalid request type
+//         break;
+//     }
+//     throw runtime_error("[server] : error encoding request");
+//     return "ERROR";
+// }
+// request coder::main_decode_request(string req_str);
+
+// string coder::main_encode_reply(reply rep);
+// reply coder::main_decode_reply(string rep_str);
+// // // // // main_encoding_decoding_end // // // // // //

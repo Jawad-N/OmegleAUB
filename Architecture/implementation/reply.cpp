@@ -39,7 +39,7 @@ int reply::getStatus() const { return status; }
 void reply::setStatus(int status_) { status = status_; }
 
 string reply::getserverMessage() const { return server_message; }
-void reply::setServerMessage(const string &serverMessage) { server_message = string(serverMessage); }
+void reply::setServerMessage(const string &serverMessage) { this->server_message = string(serverMessage); }
 
 ostream &operator<<(ostream &os, const reply &rep)
 {
@@ -52,18 +52,18 @@ ostream &operator<<(ostream &os, const reply &rep)
 // // // // Main reply class end // // // //
 
 // // // // Main reply_connect class begin // // // //
-reply_connect::reply_connect() : reply(connect_USR) {}
-reply_connect::reply_connect(int reply_id, int status, string server_message) : reply(reply_id, connect_USR, status, server_message)
+reply_connect::reply_connect() : reply(connect_CR) {}
+reply_connect::reply_connect(int reply_id, int status, string server_message) : reply(reply_id, connect_CR, status, server_message)
 {
 }
 reply_connect::reply_connect(const reply &other) : reply(other)
 {
-    if (other.getrepType() != connect_USR)
+    if (other.getrepType() != connect_CR)
         throw runtime_error("[server] : error creating reply_connect. Invalid rep_type");
 }
 reply_connect::reply_connect(const reply_connect &other) : reply(other)
 {
-    if (other.getrepType() != connect_USR)
+    if (other.getrepType() != connect_CR)
         throw runtime_error("[server] : error creating reply_connect. Invalid rep_type");
 }
 ostream &operator<<(ostream &os, const reply_connect &rep)
@@ -119,32 +119,33 @@ ostream &operator<<(ostream &os, const reply_list_CR &rep)
 // // // // Main reply_create_CR class start // // // //
 reply_create_CR::reply_create_CR() : reply(create_CR)
 {
-    setChatroomId(-1);
 }
-reply_create_CR::reply_create_CR(int reply_id, int status, string server_message, int chatroom_id) : reply(reply_id, create_CR, status, server_message)
+reply_create_CR::reply_create_CR(int reply_id, int status, string server_message, chatroom_t chatroom) : reply(reply_id, create_CR, status, server_message)
 {
-    setChatroomId(chatroom_id);
+    setChatroom(chatroom);
 }
-reply_create_CR::reply_create_CR(const reply &other, int chatroom_id) : reply(other)
+reply_create_CR::reply_create_CR(const reply &other, chatroom_t chatroom) : reply(other)
 {
     if (other.getrepType() != create_CR)
         throw runtime_error("[server] : error creating reply_create_CR in reply constructor. Invalid rep_type");
-    setChatroomId(chatroom_id);
+    setChatroom(chatroom);
 }
 reply_create_CR::reply_create_CR(const reply_create_CR &other) : reply(other)
 {
     if (other.getrepType() != create_CR)
         throw runtime_error("[server] : error creating reply_create_CR in reply constructor. Invalid rep_type");
-    setChatroomId(other.getChatroomId());
+    setChatroom(other.getChatroom());
 }
-int reply_create_CR::getChatroomId() const { return chatroom_id; }
-void reply_create_CR::setChatroomId(int chatroomId) { chatroom_id = chatroomId; }
+chatroom_t reply_create_CR::getChatroom() const { return chatroom; }
+
+void reply_create_CR::setChatroom(const chatroom_t &chatroom_) { chatroom = chatroom_t(chatroom_); }
 
 ostream &operator<<(ostream &os, const reply_create_CR &rep)
 {
     os << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -\n";
     os << static_cast<const reply &>(rep);
-    os << "Chatroom id     : " << rep.getChatroomId() << '\n';
+    os << "Chatroom        : \n"
+       << rep.getChatroom() << '\n';
     os << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -\n";
     return os;
 }
@@ -316,3 +317,29 @@ ostream &operator<<(ostream &os, const reply_list_users &rep)
     return os;
 }
 // // // // Main reply_list_users class end // // // //
+
+// // // // Main reply_disconnect class start // // // //
+
+reply_disconnect::reply_disconnect() : reply(DISCONNECT)
+{
+}
+reply_disconnect::reply_disconnect(int reply_id, int status, string server_message) : reply(reply_id, DISCONNECT, status, server_message)
+{
+}
+reply_disconnect::reply_disconnect(const reply &other) : reply(other)
+{
+    if (other.getrepType() != DISCONNECT)
+        throw runtime_error("[server] : error creating reply_connect. Invalid rep_type");
+}
+reply_disconnect::reply_disconnect(const reply_disconnect &other) : reply(other)
+{
+    if (other.getrepType() != DISCONNECT)
+        throw runtime_error("[server] : error creating reply_connect. Invalid rep_type");
+}
+ostream &operator<<(ostream &os, const reply_disconnect &rep)
+{
+    os << static_cast<const reply &>(rep);
+    return os;
+}
+
+// // // // Main reply_disconnect end // // // //
