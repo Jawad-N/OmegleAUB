@@ -104,6 +104,8 @@ void Client::C_query_again(int query_id)
         return;
     }
 }
+map<int, request> Client::getpendingRequests() const { return pending_requests; }
+void Client::setPendingRequests(const map<int, request> &pendingRequests) { pending_requests = pendingRequests; }
 // // // // Client end // // // //
 
 // // // // Getters and setters start // // // //

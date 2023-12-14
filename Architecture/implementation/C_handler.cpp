@@ -1,5 +1,6 @@
 #include "../headers/C_handler.h"
-
+#include "../headers/request.h"
+#include "../headers/coder.h"
 void C_handler::showHelp()
 {
     // Display the help message
@@ -34,4 +35,62 @@ string C_handler::getUserInput()
     std::getline(std::cin, userInput);
 
     return userInput;
+}
+
+void C_handler::connectToServer(string username)
+{
+    // create request_connect
+    request_connect req(username);
+
+    // encode request_connect
+    string encoding = coder::encode_request_connect(req);
+
+    // send request_connect encoding
+    // // send(encoding)
+    // // if(send(encoding) != -1)
+    // add request_connect to the pending_requests_queue
+    client.getpendingRequests();
+    // output waiting for the server's reply message
+}
+
+void C_handler::listAvailableChatrooms()
+{
+
+    // create request_list
+
+    // encode request_list
+
+    // send request_list encoding
+
+    // add request_list to the pending requests queue
+
+    // output waiting for the server's reply message
+}
+
+void C_handler::createChatroom(chatroom_t chatroom)
+{
+    // create request_create_CR
+    // encode request_create_CR
+    // send request_create_CR encoding
+    // add request_list to the pending requests queue
+    // output waiting for the server's reply message
+}
+
+void C_handler::joinChatroom(int chatroom_id)
+{
+
+    // create request_JLD_CR (join_CR)
+    // encode request_JLD_CR (join_CR)
+    // send request_JLD_CR (join_CR) encoding
+    // add request_JLD_CR (join_CR) to the pending requests queue
+    // output waiting for the server's reply message
+}
+
+void C_handler::leaveChatroom(int chatroom_id)
+{
+    // create request_JLD_CR (join_CR)
+    // encode request_JLD_CR (join_CR)
+    // send request_JLD_CR (join_CR) encoding
+    // add request_JLD_CR (join_CR) to the pending requests queue
+    // output waiting for the server's reply message
 }

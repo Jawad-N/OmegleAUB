@@ -1,10 +1,12 @@
 
 #include "includes.h"
 #include "structures.h"
+#include "client.h"
 class C_handler
 {
 private:
     string username = "";
+    Client client;
 
 public:
     // string getUserInput()
@@ -22,7 +24,7 @@ public:
     void listAvailableChatrooms();
 
     // Create Chatroom
-    void createChatroom();
+    void createChatroom(chatroom_t chatroom);
 
     // Join Chatroom
     void joinChatroom(int chatroom_id);
