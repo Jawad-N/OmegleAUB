@@ -63,7 +63,7 @@ public:
     set<id> getUsers() const;
     void setUsers(const set<id> &users_);
 
-    map<int, request> pendingRequests() const;
+    map<int, request> getpendingRequests() const;
     void setPendingRequests(const map<int, request> &pendingRequests);
 
     bool getActivated() const;

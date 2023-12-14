@@ -1,9 +1,54 @@
 #include <iostream>
 #include <string>
 #include <sstream>
-#include <limits>
+using namespace std;
 
 string username = "";
+
+void displayPrompt(const std::string &message = "")
+{
+    // Display command prompt
+    std::cout << "omegleAUB@" << username << " > ";
+
+    // Display additional message
+    if (!message.empty())
+        std::cout << message << " ";
+}
+
+std::string getUserInput()
+{
+    // Display command prompt
+    displayPrompt();
+
+    // Read user input
+    std::string userInput;
+    std::getline(std::cin, userInput);
+
+    return userInput;
+}
+
+std::string getUserInput(string s)
+{
+    // Display command prompt
+    displayPrompt(s);
+
+    // Read user input
+    std::string userInput;
+    std::getline(std::cin, userInput);
+
+    return userInput;
+}
+
+bool tryParseInt(const std::string &str, int &result)
+{
+    std::istringstream ss(str);
+    ss >> result;
+
+    if (ss.fail() || !ss.eof())
+        return false;
+
+    return true;
+}
 
 void showHelp()
 {
@@ -25,37 +70,40 @@ void showHelp()
               << "    hist : Show command history" << std::endl;
 }
 
-std::string getUserInput()
+class TaskHandler
 {
-    // Display command prompt
-
-    std::cout << "omegleAUB@ {{username}} > ";
-
-    // Read user input
-    std::string userInput;
-    std::getline(std::cin, userInput);
-
-    return userInput;
-}
-
-bool tryParseInt(const std::string &str, int &result)
-{
-    std::istringstream ss(str);
-    ss >> result;
-
-    if (ss.fail() || !ss.eof())
+public:
+    void handleTask(int task)
     {
-        // Parsing failed
-        return false;
+        switch (task)
+        {
+        case 0:
+            std::cout << "Connecting to server..." << std::endl;
+            handle_connect();
+            break;
+        // Add more cases for other tasks as needed
+        default:
+            std::cout << "Invalid task." << std::endl;
+            break;
+        }
     }
 
-    return true;
-}
+    void handle_connect()
+    {
+        // Take the username from the user
+        username = getUserInput("[server] Enter username: ");
+        // Display a message after connecting
+        displayPrompt("Connected as " + username);
+    }
+};
 
 int main()
 {
     // Command history
     std::string commandHistory;
+
+    // Task handler
+    TaskHandler taskHandler;
 
     // Main command loop
     while (true)
@@ -70,11 +118,12 @@ int main()
         int parsedInt;
         if (tryParseInt(userInput, parsedInt))
         {
-            std::cout << "Parsed integer: " << parsedInt << std::endl;
+            // Handle the parsed integer using the task handler
+            taskHandler.handleTask(parsedInt);
         }
 
         // Parse user input
-        if (userInput == "h")
+        else if (userInput == "h")
         {
             showHelp();
         }
