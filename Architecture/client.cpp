@@ -21,11 +21,23 @@ map<int, request> pending_requests;
 id name;
 
 
-void * listening( void * input ){
+void * listening( void * IS ){
+    int *clientSocket = (int*) IS;
+    while( true ){
 
+        char buffer[ 1024 ] = { 0 };
+        ssize_t valread = recv(incomingSocket, buffer, sizeof(buffer), MSG_WAITALL);
+        string string_buffer = (string) buffer;
+        reply rep = decode(buffer);
+        //handle reply
+
+    }
 }
-void * sending( void * input ){
-
+void * sending( void * IS ){
+    
+    int * clientScoket = ( int* ) IS;
+    
+ 
 }
 
 
@@ -40,41 +52,30 @@ int main(){
     pthread sendingThread;
 
 
-    int clientSocket = socket(AF_INET, SOCK_STREAM, 0);
-    struct sockaddr_in serverAddress;
-    socklen_t addrlen = sizeof(serverAddress);
+    int clientSocket ;
+    if( clientSocket = (clientSocket = socket(AF_INET, SOCK_STREAM, 0) ) < 0 );
+    struct sockaddr_in clientAddress;
+    socklen_t addrlen = sizeof(clientAddress);
 
-    serverAddress.sin_family = AF_INET;
-    serverAddress.sin_addr.s_addr = INADDR_ANY;
-    serverAddress.sin_port = htons(4000);
+    clientAddress.sin_family = AF_INET;
+    clientAddress.sin_addr.s_addr = INADDR_ANY;
+
+
+    if ( inet_pton( AF_INET, "127.0.0.1", &clientAddress.sin_addr ) <= 0 ){
+        cout << "Invalid" << '\n';
+        return -1;
+    }
+
     
-    if (bind(serverSocket, (struct sockaddr *)&serverAddress, sizeof(serverAddress)) < 0)
-    {
-        perror(" bind failed ");
-        exit(EXIT_FAILURE);
-    }
-    // Giving the socket the capacity to listent to incoming communication
-    if (listen(serverSocket, 3) < 0)
-    {
-        // handling potential error
-        perror(" listen failed ");
-        exit(EXIT_FAILURE);
-    }
-    int incoming;
-    // Taking in requests, if one arrives before accept then it queues up and accept does not block
-    // Otherwise accept blocks and waits until a connect request occurs
-    if ( (incoming = accept(serverSocket, (struct sockaddr *)&serverAddress, &addrlen)) < 0 )
-    {
-        // handling potential error
-        perror(" accept failed ")
-            exit(EXIT_FAILURE);
+    if( ( status = connect( clientSocket, (struct sockaddr*) &clientAddress ), sizeof(client) ) < 0  ){
+        cout << "Invalid2" << '\n';
     }
 
-    int err = pthread_create( &thread[userCounter++], NULL, listeningThread, &incoming );
-    if( err != 0 ) cout << " something is wrong " << '\n';
 
-    // make a reply containing chat rooms available
-    // available rooms sent
+    send(clientSocket, hello, strlen(hello), 0);
+    cout << "Hello sent\n" << '\n';
+
+    pthread_create( &listeningThread, NULL, listening, &clientSocket)
 
 
 
