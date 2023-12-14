@@ -29,3 +29,4 @@ void copy_to_pointer(string s, char *buffer); // updated by HK for compilation p
  * @return vector<string>
  */
 vector<string> split(string text, char delimeter);
+

@@ -420,6 +420,15 @@ reply_list_users coder::decode_reply_list_users(string rep_str)
 
     return rep;
 }
+
+string coder::encode_request_disconnect(request_disconnect req)
+{
+    return coder::encode_request(req);
+}
+request_disconnect coder::decode_request_disconnect(string req_str)
+{
+    return request_disconnect(coder::decode_request(req_str));
+}
 // // // // // Coder (reply's version) end // // // // // //
 
 // // // // // main_encoding_decoding_start // // // // // //
