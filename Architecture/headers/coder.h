@@ -146,6 +146,9 @@ public:
     static string encode_request_private_message(request_private_message req);
     static request_private_message decode_request_private_message(string req_str);
 
+    static string encode_request_disconnect(request_disconnect req);
+    static request_disconnect decode_request_disconnect(string req_str);
+
     static string encode_reply(reply rep);
     static reply decode_reply(string rep_str);
 

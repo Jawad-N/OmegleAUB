@@ -13,9 +13,10 @@ private:
     set<id> users;                      // set of friends (reachable users)
     map<int, request> pending_requests; // all the requests that are waiting
     // socket connection
-    pthread_t l_thread; // thread for listening
-    pthread_t w_thread; // thread for writing
-    bool activated;     // set act activated to true
+    pthread_t l_thread;                           // thread for listening
+    pthread_t w_thread;                           // thread for writing
+    map<int, vector<message_t>> chatroom_history; // chat history of the chatrooms.
+    bool activated;                               // set act activated to true
 
 public:
     Client();
