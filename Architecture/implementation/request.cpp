@@ -91,17 +91,17 @@ ostream &operator<<(ostream &os, const request_connect &req)
 request_list::request_list() : request(list_CR) {}
 request_list::request_list(const request &other) : request(other)
 {
-    if (other.getreqType() != list_users || other.getreqType() != list_CR)
+    if (other.getreqType() != list_users && other.getreqType() != list_CR)
         throw runtime_error("[server] : Error creating request_list from request constructor. reqtype incompatible");
 }
 request_list::request_list(const request_list &other) : request(other)
 {
-    if (other.getreqType() != list_users || other.getreqType() != list_CR)
+    if (other.getreqType() != list_users && other.getreqType() != list_CR)
         throw runtime_error("[server] : Error creating request_list from request_list constructor. reqtype incompatible");
 }
 request_list::request_list(request_t req_type) : request(req_type)
 {
-    if (req_type != list_users || req_type != list_CR)
+    if (req_type != list_users && req_type != list_CR)
         throw runtime_error("[server] : Error creating request_list from request_t constructor. reqtype incompatible");
 }
 ostream &operator<<(ostream &os, const request_list &req)
@@ -139,7 +139,10 @@ void request_create_CR::setChatroom(const chatroom_t &chatroom_) { chatroom = ch
 ostream &operator<<(ostream &os, const request_create_CR &req)
 {
     os << static_cast<const request &>(req);
-    os << "Chatroom     : " << req.getChatroom() << '\n';
+    os << "Chatroom     : \n";
+    os << "- - - - - - - - - - - - -\n";
+    os << req.getChatroom() << '\n';
+    os << "- - - - - - - - - - - - -\n";
     return os;
 }
 

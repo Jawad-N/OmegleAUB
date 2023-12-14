@@ -86,8 +86,8 @@ public:
     request_create_CR(const request_create_CR &other);
     request_create_CR(chatroom_t chatroom);
 
-    chatroom_t getChatroom() const { return chatroom; }
-    void setChatroom(const chatroom_t &chatroom_) { chatroom = chatroom_; }
+    chatroom_t getChatroom() const;
+    void setChatroom(const chatroom_t &chatroom_);
     friend ostream &operator<<(ostream &os, const request_create_CR &req);
 };
 

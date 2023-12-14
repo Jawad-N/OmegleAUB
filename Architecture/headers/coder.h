@@ -128,7 +128,7 @@ public:
      * @param req_str
      * @return request_create_CR
      */
-    static request_create_CR decode_request_create_CR(request_create_CR req_str);
+    static request_create_CR decode_request_create_CR(string req_str);
 };
 
 // request_connect , request_list,request_create_CR,request_JLD_CR,request_broadcast_message,request_private_message,request_disconnect
