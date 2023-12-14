@@ -57,6 +57,7 @@ public:
     set<id> getMembers() const;
     void setMembers(const set<id> &members_);
     friend ostream &operator<<(ostream &os, const chatroom_t &chatroom);
+    bool operator<(const chatroom_t& other) const;
 };
 
 class message_t

@@ -81,18 +81,15 @@ void * listeningThread( void * IC ){
             request_private_message req = coder::decode_request_private_message( string_buffer );
             if(flag) req.getFrom() = socketToName[*incomingSocket];
             q.push( &req );
-        } else if (type == DISCONNECT) {
-            request_disconnect req = coder::decode_request_disconnect( string_buffer );
-            if(flag) req.getFrom() = socketToName[*incomingSocket];
-            q.push( &req );
+        } else if ( type == DISCONNECT ){
+            queueMutex.unlock();
+            break; // when disonnecting, reach pthread_exit to kill the thread
         }
         queueMutex.unlock();
         
         work.release(); // to signal a working thread to start working
 
-        if( req.reques_t == DISCONNECT ){
-            break; // when disonnecting, reach pthread_exit to kill the thread
-        }
+        
 
     }
 
@@ -423,7 +420,7 @@ void * workingThread( void * index ){ // no input taken here
         }
         else if( req->getrequestId() == BROADCAST_MESSAGE ){
             request_broadcast_message* reqn = ( request_broadcast_message* ) req;
-            broadcastRequest( *req );
+            broadcastRequest( *reqn );
         }
         else if( req->getrequestId() == list_users){
             request_list* reqn = ( request_list* ) req;
