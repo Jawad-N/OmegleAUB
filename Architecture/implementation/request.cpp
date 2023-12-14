@@ -153,6 +153,7 @@ request_JLD_CR::request_JLD_CR() : request()
 {
     setReqType(leave_CR);
 }
+
 request_JLD_CR::request_JLD_CR(request_t req_type, int chatroom_ID) : request(req_type)
 {
     // if

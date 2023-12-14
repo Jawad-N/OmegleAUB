@@ -172,6 +172,16 @@ public:
 
     static string encode_reply_list_users(reply_list_users rep);
     static reply_list_users decode_reply_list_users(string rep_str);
+
+    /**
+     * @brief Now for the main encoding and decoding functions
+     *
+     */
+    // static string main_encode_request(request req);
+    // static request main_decode_request(string req_str);
+
+    // static string main_encode_reply(reply rep);
+    // static reply main_decode_reply(string rep_str);
 };
 
 // request_connect , request_list,request_create_CR,request_JLD_CR,request_broadcast_message,request_private_message,request_disconnect

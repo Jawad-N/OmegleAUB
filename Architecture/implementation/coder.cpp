@@ -411,3 +411,68 @@ reply_list_users coder::decode_reply_list_users(string rep_str)
     return rep;
 }
 // // // // // Coder (reply's version) end // // // // // //
+
+// // // // // main_encoding_decoding_start // // // // // //
+// string coder::main_encode_request(request req)
+// {
+//     switch (req.getreqType())
+//     {
+//     case connect_CR:
+//         return encode_request(req);
+//         break;
+//     case list_CR:
+//         return encode_request_list((request_list)req);
+//         // Handle list_CR
+//         break;
+//     case create_CR:
+//         return encode_request_create_CR((request_create_CR)req);
+//         // Handle create_CR
+//         break;
+//     case join_CR:
+
+//         // Handle join_CR
+//         return encode_request_JLD_CR((request_JLD_CR)req);
+//         break;
+//     case leave_CR:
+//         // Handle leave_CR
+//         return encode_request_JLD_CR((request_JLD_CR)req);
+//         break;
+//     case delete_CR:
+//         // Handle delete_CR
+//         return encode_request_JLD_CR((request_JLD_CR)req);
+//         break;
+//     case BROADCAST_MESSAGE:
+//         // Handle BROADCAST_MESSAGE
+//         return encode_request_broadcast_message((request_broadcast_message)req);
+//         break;
+//     case list_users:
+//         // Handle list_users
+//         return encode_request_list((request_list)req);
+//         break;
+//     case PRIVATE_MESSAGE:
+
+//         // Handle PRIVATE_MESSAGE
+//         return encode_request_private_message((request_private_message)req);
+//         break;
+//     case DISCONNECT:
+//         // Handle DISCONNECT
+//         // Add request disconnect
+//         return "";
+//         break;
+//     case connect_USR:
+//         // Handle connect_USR
+//         // return encode_req //
+//         return encode_request_connect((request_connect)req);
+//         break;
+//     default:
+//         // Handle invalid request type
+//         break;
+//     }
+//     throw runtime_error("[server] : error encoding request");
+//     return "ERROR";
+// }
+// request coder::main_decode_request(string req_str);
+
+// string coder::main_encode_reply(reply rep);
+// reply coder::main_decode_reply(string rep_str);
+// // // // // main_encoding_decoding_end // // // // // //

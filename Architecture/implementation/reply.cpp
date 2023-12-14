@@ -39,7 +39,7 @@ int reply::getStatus() const { return status; }
 void reply::setStatus(int status_) { status = status_; }
 
 string reply::getserverMessage() const { return server_message; }
-void reply::setServerMessage(const string &serverMessage) { server_message = string(serverMessage); }
+void reply::setServerMessage(const string &serverMessage) { this->server_message = string(serverMessage); }
 
 ostream &operator<<(ostream &os, const reply &rep)
 {
@@ -52,18 +52,18 @@ ostream &operator<<(ostream &os, const reply &rep)
 // // // // Main reply class end // // // //
 
 // // // // Main reply_connect class begin // // // //
-reply_connect::reply_connect() : reply(connect_USR) {}
-reply_connect::reply_connect(int reply_id, int status, string server_message) : reply(reply_id, connect_USR, status, server_message)
+reply_connect::reply_connect() : reply(connect_CR) {}
+reply_connect::reply_connect(int reply_id, int status, string server_message) : reply(reply_id, connect_CR, status, server_message)
 {
 }
 reply_connect::reply_connect(const reply &other) : reply(other)
 {
-    if (other.getrepType() != connect_USR)
+    if (other.getrepType() != connect_CR)
         throw runtime_error("[server] : error creating reply_connect. Invalid rep_type");
 }
 reply_connect::reply_connect(const reply_connect &other) : reply(other)
 {
-    if (other.getrepType() != connect_USR)
+    if (other.getrepType() != connect_CR)
         throw runtime_error("[server] : error creating reply_connect. Invalid rep_type");
 }
 ostream &operator<<(ostream &os, const reply_connect &rep)
