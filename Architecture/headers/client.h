@@ -12,7 +12,14 @@ private:
     set<int> chatrooms;                 // chatroom_ids
     set<id> users;                      // set of friends (reachable users)
     map<int, request> pending_requests; // all the requests that are waiting
-    // socket connection
+    // socket connection // Jawad can you add a socket structure
+    /**
+     * Jawad can you add socket structure or class that have the following operation
+     * > connect(string ip_address,int port);
+     * > send(string message) : sends the message after the connection
+     * > close()              : close the the connection
+     * > receive()            : returns a string which is the message received via the connection
+     */
     pthread_t l_thread;                           // thread for listening
     pthread_t w_thread;                           // thread for writing
     map<int, vector<message_t>> chatroom_history; // chat history of the chatrooms.
