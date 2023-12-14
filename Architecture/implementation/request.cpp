@@ -56,6 +56,7 @@ ostream &operator<<(ostream &os, const request &req)
     os << "Request ID   : " << req.getrequestId() << "\n";
     os << "Request type : " << request::request_mapper[req.getreqType()] << '\n';
     os << "From         : " << req.getFrom() << '\n';
+    os << "Socket       : " << req.getSocket() << '\n';
     return os;
 }
 
