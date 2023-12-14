@@ -426,6 +426,7 @@ void listUsersRequest( request_list req ){
     string string_buffer = encode( rep );
     send( req.getSocket(), string_buffer.c_str(), string_buffer.size(), 0 );
 }
+
 //checked
 void disconnectRequest( request_disconnect req ){
     for( chatroom_t cr: CR ){
