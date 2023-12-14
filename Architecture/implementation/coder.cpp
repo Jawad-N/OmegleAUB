@@ -184,6 +184,63 @@ request_create_CR coder::decode_request_create_CR(string req_str)
     return req;
 }
 
+string coder::encode_request_JLD_CR(request_JLD_CR req)
+{
+    // Encoding scheme : request sep_req_repl chatroom_id sep_req_repl
+    return coder::encode_request(req) + coder::sep_req_repl + to_string(req.getchatroomID()) + coder::sep_req_repl;
+}
+request_JLD_CR coder::decode_request_JLD_CR(string req_str)
+{
+    vector<string> content = split(req_str, coder::sep_req_repl);
+    if (content.size() != 2)
+        throw runtime_error("[server] :  invalid encoding for request_JLD_CR. Request : " + req_str);
+    // Try except
+    // Realisation : incosistency in classes reperesentation.
+    request main_req = coder::decode_request(content[0]);
+    int chatroom_id = stoi(content[1]);
+    request_JLD_CR req(main_req, chatroom_id);
+    return req;
+}
+
+string coder::encode_request_broadcast_message(request_broadcast_message req)
+{
+    // request sep_req_repl chatroom_id sep_req_repl encode_message_t(message) sep_req_repl
+    return coder::encode_request(req) + coder::sep_req_repl + to_string(req.getchatroomID()) +
+           coder::sep_req_repl + coder::encode_message_t(req.getMessage()) + coder::sep_req_repl;
+}
+request_broadcast_message coder::decode_request_broadcast_message(string req_str)
+{
+    vector<string> content = split(req_str, coder::sep_req_repl);
+    if (content.size() != 3)
+        throw runtime_error("[server] :  invalid encoding for request_broadcast_message. Request : " + req_str);
+
+    // Try except
+    request main_req = coder::decode_request(content[0]);
+    int chatroom_id = stoi(content[1]);
+    message_t message = coder::decode_message_t(content[2]);
+    return request_broadcast_message(main_req, chatroom_id, message);
+}
+
+string coder::encode_request_private_message(request_private_message req)
+{
+    // request sep_req_repl user_id sep_req_repl encode_message_t(message) sep_req_repl
+
+    return coder::encode_request(req) + coder::sep_req_repl + req.getuserId() +
+           coder::sep_req_repl + coder::encode_message_t(req.getMessage()) + coder::sep_req_repl;
+}
+request_private_message coder::decode_request_private_message(string req_str)
+{
+    vector<string> content = split(req_str, coder::sep_req_repl);
+    if (content.size() != 3)
+        throw runtime_error("[server] :  invalid encoding for request_private_message. Request : " + req_str);
+
+    // Try except
+    request main_req = coder::decode_request(content[0]);
+    id user_id = content[1];
+    message_t message = coder::decode_message_t(content[2]);
+    return request_private_message(main_req, user_id, message);
+}
+
 // // // // // // Coder (reply's version) // // // // // //
 
 string coder::encode_reply(reply rep)

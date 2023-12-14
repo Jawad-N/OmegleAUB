@@ -182,3 +182,109 @@ ostream &operator<<(ostream &os, const request_JLD_CR &req)
     return os;
 }
 // // // // // request_create_CR_end // // // // //
+// // // // // request_broadcast_message_start // // // // //
+request_broadcast_message::request_broadcast_message() : request()
+{
+    setReqType(BROADCAST_MESSAGE);
+}
+request_broadcast_message::request_broadcast_message(int chatroom_ID, message_t message) : request(BROADCAST_MESSAGE)
+{
+
+    setChatroomID(chatroom_ID);
+    setMessage(message);
+}
+request_broadcast_message::request_broadcast_message(const request &other, int chatroom_ID, message_t message) : request(other)
+{
+
+    if (other.getreqType() != BROADCAST_MESSAGE)
+        throw runtime_error("[server] : Error creating request_broadcast_message from request constructor. reqtype incompatible");
+    setChatroomID(chatroom_ID);
+    setMessage(message);
+}
+request_broadcast_message::request_broadcast_message(const request_broadcast_message &other) : request(other)
+{
+    if (other.getreqType() != BROADCAST_MESSAGE)
+        throw runtime_error("[server] : Error creating request_broadcast_message from request constructor. reqtype incompatible");
+    setChatroomID(other.getchatroomID());
+    setMessage(other.getMessage());
+}
+
+// request_broadcast_message(int chatroom_ID, message_t message);
+
+int request_broadcast_message::getchatroomID() const { return chatroom_ID; }
+void request_broadcast_message::setChatroomID(int chatroomID) { chatroom_ID = chatroomID; }
+
+message_t request_broadcast_message::getMessage() const { return message; }
+void request_broadcast_message::setMessage(const message_t &message_) { message = message_t(message_); }
+ostream &operator<<(ostream &os, const request_broadcast_message &req)
+{
+    os << static_cast<const request &>(req);
+    os << "Chatroom id     : " << req.getchatroomID() << '\n';
+    os << "- - - - - - - - - - - - - - \n";
+    os << "Message         : \n";
+    os << req.getMessage() << '\n';
+    os << "- - - - - - - - - - - - - - \n";
+    return os;
+}
+// // // // // request_broadcast_message_end // // // // //
+
+// // // // // request_private_message_start // // // // //
+request_private_message::request_private_message() : request() { setReqType(PRIVATE_MESSAGE); }
+request_private_message::request_private_message(id user_id, message_t message) : request(PRIVATE_MESSAGE)
+{
+    setUserId(user_id);
+    setMessage(message);
+}
+request_private_message::request_private_message(const request &other, id user_id, message_t message) : request(other)
+{
+    if (other.getreqType() != PRIVATE_MESSAGE)
+        throw runtime_error("[server] : Error creating request_private_message from request constructor. reqtype incompatible");
+    setUserId(user_id);
+    setMessage(message);
+}
+request_private_message::request_private_message(const request_private_message &other) : request(other)
+{
+    if (other.getreqType() != PRIVATE_MESSAGE)
+        throw runtime_error("[server] : Error creating request_private_message from request constructor. reqtype incompatible");
+    setUserId(other.getuserId());
+    setMessage(other.getMessage());
+}
+
+// request_private_message(id user_id, message_t message);
+
+id request_private_message::getuserId() const { return user_id; }
+void request_private_message::setUserId(id userId) { user_id = userId; }
+
+message_t request_private_message::getMessage() const { return message; }
+void request_private_message::setMessage(const message_t &message_) { message = message_t(message_); }
+ostream &operator<<(ostream &os, const request_private_message &req)
+{
+    os << static_cast<const request &>(req);
+    os << "Chatroom id     : " << req.getuserId() << '\n';
+    os << "- - - - - - - - - - - - - - \n";
+    os << "Message         : \n";
+    os << req.getMessage() << '\n';
+    os << "- - - - - - - - - - - - - - \n";
+    return os;
+}
+// // // // // request_private_message_end // // // // //
+// // // // // request_disconnect_start // // // // //
+request_disconnect::request_disconnect() : request() { setReqType(DISCONNECT); };
+request_disconnect::request_disconnect(const request &other) : request(other)
+{
+    if (other.getreqType() != DISCONNECT)
+        throw runtime_error("[server] : Error creating request_disconnect from request constructor. reqtype incompatible");
+}
+request_disconnect::request_disconnect(const request_disconnect &other) : request(other)
+{
+    if (other.getreqType() != DISCONNECT)
+        throw runtime_error("[server] : Error creating request_disconnect from request constructor. reqtype incompatible");
+}
+
+// request_disconnect();
+ostream &operator<<(ostream &os, const request_disconnect &req)
+{
+    os << static_cast<const request &>(req);
+    return os;
+}
+// // // // // request_disconnect_end // // // // //

@@ -137,20 +137,16 @@ public:
      *
      */
 
-    /**
-     * @brief encodes reply to string
-     * Encoding scheme : rep_type sep_req_repl_main reply_id sep_req_repl_main status sep_req_repl_main server_message sep_req_repl_main
-     * @param rep
-     * @return string
-     */
-    static string encode_reply(reply rep);
+    static string encode_request_JLD_CR(request_JLD_CR req);
+    static request_JLD_CR decode_request_JLD_CR(string req_str);
 
-    /**
-     * @brief decodes from string to reply
-     *
-     * @param rep_str
-     * @return reply
-     */
+    static string encode_request_broadcast_message(request_broadcast_message req);
+    static request_broadcast_message decode_request_broadcast_message(string req_str);
+
+    static string encode_request_private_message(request_private_message req);
+    static request_private_message decode_request_private_message(string req_str);
+
+    static string encode_reply(reply rep);
     static reply decode_reply(string rep_str);
 
     static string encode_reply_connect(reply_connect rep);

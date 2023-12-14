@@ -123,11 +123,11 @@ public:
 
     // request_broadcast_message(int chatroom_ID, message_t message);
 
-    int getchatroomID() const { return chatroom_ID; }
-    void setChatroomID(int chatroomID) { chatroom_ID = chatroomID; }
+    int getchatroomID() const;
+    void setChatroomID(int chatroomID);
 
-    message_t getMessage() const { return message; }
-    void setMessage(const message_t &message_) { message = message_; }
+    message_t getMessage() const;
+    void setMessage(const message_t &message_);
     friend ostream &operator<<(ostream &os, const request_broadcast_message &req);
 };
 
@@ -146,11 +146,11 @@ public:
 
     // request_private_message(id user_id, message_t message);
 
-    id getuserId() const { return user_id; }
-    void setUserId(id userId) { user_id = userId; }
+    id getuserId() const;
+    void setUserId(id userId);
 
-    message_t getMessage() const { return message; }
-    void setMessage(const message_t &message_) { message = message_; }
+    message_t getMessage() const;
+    void setMessage(const message_t &message_);
     friend ostream &operator<<(ostream &os, const request_private_message &req);
 };
 
