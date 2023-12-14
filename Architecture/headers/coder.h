@@ -177,6 +177,10 @@ public:
      * @brief Now for the main encoding and decoding functions
      *
      */
+
+    // Split and check the rep_type attribute.
+    static request_t get_encode_request_type(request req);
+    static request_t get_encode_reply_type(reply rep);
     // static string main_encode_request(request req);
     // static request main_decode_request(string req_str);
 

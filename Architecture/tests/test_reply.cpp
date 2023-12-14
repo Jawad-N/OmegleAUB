@@ -45,7 +45,10 @@ void test_reply_connect()
     cout << decoding << '\n';
 }
 
-void test_reply_list_CR();
+void test_reply_list_CR()
+{
+    reply_connect rep(123, 604, "MESSAFE");
+}
 
 void test_reply_JLD_CR();
 
