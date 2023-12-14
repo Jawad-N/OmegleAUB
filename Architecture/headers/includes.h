@@ -1,6 +1,16 @@
 #pragma once
 #include <bits/stdc++.h>
 #include <chrono>
+#include <netinet/in.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/socket.h>
+#include <unistd.h>
+#include <chrono>
+#include <ctime>
+#include <mutex>
+#include <semaphore.h>
+
 using namespace std;
 
 enum request_t
