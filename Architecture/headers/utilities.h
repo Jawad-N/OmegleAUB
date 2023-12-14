@@ -16,6 +16,11 @@ public:
     static time_t stringToTime(string dateString);
 };
 
+char * copy_to_pointer( string s, char * buffer);
+//convert a string to character pointer for encoding
+//since send takes a void *
+
+
 /**
  * @brief Behaves similarly to the python functions .split(delimeter)
  *
