@@ -224,8 +224,10 @@ void joinRequest(request_JLD_CR req)
         for (chatroom_t cr : CR)
         {
             if (cr.getchatroomID() == req.getchatroomID())
-            {
-                cr.getMembers().insert(req.getFrom());
+            {   
+                set<id> tempSet = cr.getMembers();
+                tempSet.insert( req.getFrom() );
+                cr.setMembers(tempSet);
                 flag = true;
                 break;
             }
@@ -260,8 +262,10 @@ void leaveRequest(request_JLD_CR req)
         {
             if (cr.getchatroomID() == req.getrequestId())
             {
-                cr.getMembers().erase(req.getFrom());
-                rep.setServerMessage("left room ");
+                set<id> tempSet = cr.getMembers();
+                tempSet.erase( req.getFrom() );
+                cr.setMembers( tempSet );
+                rep.setServerMessage("left room");
                 rep.setStatus(200);
                 flag = true;
             }
@@ -446,7 +450,9 @@ void disconnectRequest(request_disconnect req)
         {
             if (person == req.getFrom())
             {
-                cr.getMembers().erase(person);
+                set<id> tempSet = cr.getMembers(); 
+                tempSet.erase( person );
+                cr.setMembers( tempSet );
             }
         }
     }

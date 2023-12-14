@@ -62,8 +62,9 @@ int main(){
 
     pthread listeningThread;
     pthread sendingThread;
-    
 
+    string nameHandle;
+    cout << "Specify Username Please: "; cin >> nameHandle;
     int clientSocket ;
     if( ( clientSocket = (clientSocket = socket(AF_INET, SOCK_STREAM, 0) ) ) < 0 );
     struct sockaddr_in clientAddress;
