@@ -48,16 +48,17 @@ void *listeningThread(void *IC)
         cout << "TYPE RECEIVED: " << (int)type << '\n';
         queueMutex.lock();
         if (type == connect_CR)
-        {            request_connect req = coder::decode_request_connect(string_buffer);
+        {
+            request_connect req = coder::decode_request_connect(string_buffer);
             req.setSocket( *incomingSocket );
-            if (flag) req.getFrom() = socketToName[*incomingSocket];
+            if ( flag ) req.setFrom( socketToName[*incomingSocket] );
             q.push(&req);
         }
         else if (type == list_CR)
         {
             request_list req = coder::decode_request_list(string_buffer);
             req.setSocket( *incomingSocket );
-            if (flag) req.getFrom() = socketToName[*incomingSocket];
+            if ( flag ) req.setFrom( socketToName[*incomingSocket] ) ;
             q.push(&req);
         }
         else if (type == create_CR)
@@ -66,22 +67,21 @@ void *listeningThread(void *IC)
             req.setFrom( "menjarib" ) ;
             cout << "I'M INSTANCE: "<< req.getFrom() << "\n";
             req.setSocket( *incomingSocket );
-            if (flag) req.getFrom() = socketToName[*incomingSocket];
-            
+            if ( flag ) req.setFrom( socketToName[*incomingSocket] ) ; 
             q.push(&req);
         }
         else if (type == join_CR)
         {
             request_JLD_CR req = coder::decode_request_JLD_CR(string_buffer);
             req.setSocket( *incomingSocket );
-            if (flag) req.getFrom() = socketToName[*incomingSocket];
+            if ( flag ) req.setFrom( socketToName[*incomingSocket] ) ;
             q.push(&req);
         }
         else if (type == leave_CR)
         {
             request_JLD_CR req = coder::decode_request_JLD_CR(string_buffer);
             req.setSocket( *incomingSocket );
-            if (flag) req.getFrom() = socketToName[*incomingSocket];
+            if (flag) req.setFrom( socketToName[*incomingSocket] ) ;
             q.push(&req);
         }
         else if (type == delete_CR)
@@ -90,28 +90,28 @@ void *listeningThread(void *IC)
             request_JLD_CR req = coder::decode_request_JLD_CR(string_buffer);
             cout << " DECODING CHECK: " << req.getchatroomID() << '\n';
             req.setSocket( *incomingSocket );
-            if (flag) req.getFrom() = socketToName[*incomingSocket];
+            if ( flag ) req.setFrom( socketToName[*incomingSocket] ) ;
             q.push(&req);
         }
         else if (type == BROADCAST_MESSAGE)
         {
             request_broadcast_message req = coder::decode_request_broadcast_message(string_buffer);
             req.setSocket( *incomingSocket );
-            if (flag) req.getFrom() = socketToName[*incomingSocket];
+            if ( flag ) req.setFrom( socketToName[*incomingSocket] ) ;
             q.push(&req);
         }
         else if (type == list_users)
         {
             request_list req = coder::decode_request_list(string_buffer);
             req.setSocket( *incomingSocket );
-            if (flag) req.getFrom() = socketToName[*incomingSocket];
+            if ( flag ) req.setFrom( socketToName[*incomingSocket] ) ;
             q.push(&req);
         }
         else if (type == PRIVATE_MESSAGE)
         {
             request_private_message req = coder::decode_request_private_message(string_buffer);
             req.setSocket( *incomingSocket );
-            if (flag) req.getFrom() = socketToName[*incomingSocket];
+            if (flag) req.setFrom( socketToName[*incomingSocket] ) ;
             q.push(&req);
         }
         else if (type == DISCONNECT)
@@ -271,7 +271,7 @@ void joinRequest(request_JLD_CR req)
                     cout << name << ' ';
                 }
                 cout << '\n';
-                if( cr.getMembers().find( req.getFrom() ) == cr.getMembers().end() ){
+                if( cr.getMembers().find( req.getFrom() ) != cr.getMembers().end() ){
                     rep.setServerMessage("You Are Already In That Room");
                 }
                 else{
@@ -279,8 +279,9 @@ void joinRequest(request_JLD_CR req)
                     set<id> tempSet = cr.getMembers();
                     tempSet.insert( req.getFrom() );
                     cr.setMembers(tempSet);
-                    flag = true;
+                    
                 }
+                flag = true;
                 break;
             }
         }
@@ -303,21 +304,30 @@ void joinRequest(request_JLD_CR req)
 
 //
 void leaveRequest(request_JLD_CR req)
-{
+{   
+    cout << "FROM LEAVE: " << req.getFrom() << '\n';
     reply_JLD_CR rep;
     rep.setRepType( leave_CR );
     rep.setReplyId( req.getrequestId() );
+    rep.setChatroomId( req.getchatroomID() );
     try
     {
         bool flag = false;
-        for (chatroom_t cr : CR){
-            if (cr.getchatroomID() == req.getrequestId())
+        for(int i = 0; i < CR.size(); )
+        for (auto it = CR.begin(); it != CR.end(); ++it){
+            chatroom_t cr = *it;
+            if (cr.getchatroomID() == req.getchatroomID())
             {   
                 if( cr.getMembers().find( req.getFrom() ) != cr.getMembers().end() ){
                     set<id> tempSet = cr.getMembers();
+                    cout << "tempsets:" <<'\n';
+                    for( id si: tempSet ) cout << si << ' ';
+                    cout << '\n';
                     tempSet.erase( req.getFrom() );
+                    for( id si: tempSet ) cout << si << ' ';
+                    cout << '\n';
                     cr.setMembers( tempSet );
-                    string temp = "Left Room" + cr.getName();
+                    string temp = "Left Room " + cr.getName();
                     rep.setServerMessage( temp );
                     rep.setStatus(200);
                 }
@@ -327,6 +337,8 @@ void leaveRequest(request_JLD_CR req)
                 }
                 flag = true;
             }
+            it = CR.erase(it);
+            CR.insert(cr);
         }
         if (!flag){
             rep.setServerMessage("ChatRoom Does Not Exist");
@@ -346,14 +358,15 @@ void leaveRequest(request_JLD_CR req)
 void deleteRequest(request_JLD_CR req)
 {
     reply_JLD_CR rep;
-    rep.setRepType(delete_CR);
-    rep.setReplyId(req.getrequestId());
+    rep.setRepType( delete_CR );
+    rep.setReplyId( req.getrequestId() );
     
     try
     {
         bool flag = false;
-        for (chatroom_t cr : CR)
+        for(auto it = CR.begin(); it != CR.end(); ++it)
         {
+            chatroom_t cr = *it;
             if (cr.getchatroomID() == req.getchatroomID())
             {
                 if( cr.getOwner() != req.getFrom() ){
@@ -392,6 +405,8 @@ void deleteRequest(request_JLD_CR req)
                 rep.setChatroomId(req.getchatroomID());
                 break;
             }
+            it = CR.erase(it);
+            CR.insert(cr);
         }
         if (!flag)
         {
@@ -580,7 +595,16 @@ void *workingThread(void *index)
 
 int main()
 {
+    chatroom_t chat = chatroom_t();
+    chat.setCapacity(100);
+    chat.setChatroomID(-1);
+    chat.setCreated(time(nullptr));
+    chat.setDescription("OS is fun and Easy");
+    chat.setMembers({"Jawad", "Hashem"});
+    chat.setName("Bechtel110");
+    chat.setOwner("HASHEM&JAWAD");
 
+    CR.insert(chat);
     pthread_t threads[100];
     pthread_t wThreads[30];
     sem_init(&work,0,0);

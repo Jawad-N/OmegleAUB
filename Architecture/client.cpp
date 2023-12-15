@@ -29,9 +29,7 @@ void * listening( void * IS ){
     while( true ){
         char buffer[ 1024 ] = { 0 };
         ssize_t valread = 0 ;
-        cout.flush();
         valread = read( *clientSocket, buffer, sizeof(buffer) );
-        cout.flush();
         string string_buffer = (string) buffer;
         request_t type = coder::get_encode_reply_type(string_buffer);
         
@@ -114,7 +112,7 @@ void * sending( void * IS ){
             else if( type == delete_CR ){
                 int roomID;
                 cout << "Pick A Room To Delete By ID: "; cin >> roomID;
-                request_JLD_CR req = request_JLD_CR( leave_CR, roomID );
+                request_JLD_CR req = request_JLD_CR( delete_CR, roomID );
                 string string_buffer = coder::encode_request_JLD_CR( req );            
                 send( *clientSocket, string_buffer.c_str(), string_buffer.size(), 0 );
             }
