@@ -52,7 +52,9 @@ void * listening( void * IS ){
             cout << coder::decode_reply_broadcast_message( string_buffer ) << '\n';
         }
         else if( type == list_users ){
-            cout << coder::decode_reply_list_users( string_buffer ) << '\n';
+            reply_list_users rep = coder::decode_reply_list_users( string_buffer );
+            cout << "USERS: ";
+            for(id pep: rep.getUsers()) cout << pep << ' '; cout << '\n';
         }
         else if( type == PRIVATE_MESSAGE ){
             cout << coder::decode_reply_private_message( string_buffer ) << '\n';
@@ -122,12 +124,21 @@ void * sending( void * IS ){
                 string string_buffer = coder::encode_request_broadcast_message( req ); 
                 cout << coder::decode_reply_broadcast_message( string_buffer ) << '\n';
             }
-            // else if( type == list_users ){
-            //     cout << coder::decode_reply_list_users( string_buffer ) << '\n';
-            // }
-            // else if( type == PRIVATE_MESSAGE ){
-            //     cout << coder::decode_reply_private_message( string_buffer ) << '\n';
-            // }
+
+            //under evaluation, error in decoding or encoding possibly
+            else if( type == list_users ){
+                request_list req = request_list(list_users);
+                string string_buffer = coder::encode_request_list( req );
+                send( *clientSocket, string_buffer.c_str(), string_buffer.size(), 0 );
+                
+            }
+            else if( type == PRIVATE_MESSAGE ){
+                request_private_message req = request_private_message();
+                string recepient; cout << "Specify Recipient: "; cin >> recepient;
+                message_t msg(  );
+                
+                cout << coder::decode_reply_private_message( string_buffer ) << '\n';
+            }
             else if( type == DISCONNECT ){
                 request_disconnect req = request_disconnect( DISCONNECT );
                 string string_buffer = coder::encode_request_disconnect( req );
@@ -135,6 +146,7 @@ void * sending( void * IS ){
             }
         }
         catch( const exception &e ){
+            cout << e.what() <<'\n';
             cout << "Input error" << '\n';
         }
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
