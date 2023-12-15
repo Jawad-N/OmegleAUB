@@ -43,11 +43,14 @@ void *listeningThread(void *IC)
         cout << valread << '\n';
         cout << "received" << buffer << '\n';
         bool flag = false;
-        if (socketToName.find(*incomingSocket) != socketToName.end())
-            flag = true;
+        if (socketToName.find(*incomingSocket) != socketToName.end()) flag = true;
         string string_buffer = (string)buffer;
+        cout << "Here\n";
+        cout << string_buffer << '\n';
+        cout.flush();
         request_t type = coder::get_encode_request_type(string_buffer);
         cout << "TYPE RECEIVED: " << (int)type << '\n';
+        cout.flush();
         queueMutex.lock();
         if (type == connect_CR)
         {
@@ -127,9 +130,9 @@ void *listeningThread(void *IC)
         }
         else if (type == DISCONNECT)
         {
+            queueMutex.unlock();
             close(*incomingSocket);
             exit(0);
-            // queueMutex.unlock();
             break; // when disonnecting, reach pthread_exit to kill the thread
         }
         else
@@ -402,14 +405,15 @@ void deleteRequest(request_JLD_CR req)
                     {
                         if (s != cr.getOwner())
                         {
-                            request_JLD_CR reqt;
-                            reqt.setChatroomID(req.getchatroomID());
-                            reqt.setRequestId(req.getrequestId());
-                            reqt.setFrom(s);
-                            reqt.setReqType(leave_CR);
+                            request_JLD_CR* reqt = new request_JLD_CR();
+                            reqt->setChatroomID(req.getchatroomID());
+                            reqt->setRequestId(req.getrequestId());
+                            reqt->setFrom(s);
+                            reqt->setReqType(leave_CR);
                             queueMutex.lock();
-                            q.push(&reqt); // requesting people to leave the chatroom before deletion
+                            q.push( reqt ); // requesting people to leave the chatroom before deletion
                             queueMutex.unlock();
+                            sem_post(&work);
                         }
                     }
                     queueMutex.lock();
@@ -445,44 +449,7 @@ void deleteRequest(request_JLD_CR req)
     send(req.getSocket(), string_buffer.c_str(), string_buffer.size(), 0);
 }
 
-// checked
-void broadcastRequest(request_broadcast_message req)
-{
-    reply_broadcast_message rep;
-    rep.setChatroomId(req.getchatroomID());
-    rep.setMessage(req.getMessage());
-    try
-    {
-        for (chatroom_t cr : CR)
-        {
-            if (cr.getchatroomID() == req.getchatroomID())
-            {
-                for (id person : cr.getMembers())
-                {
-                    request_private_message reqt;
-                    reqt.setRequestId(req.getrequestId());
-                    reqt.setReqType(PRIVATE_MESSAGE);
-                    reqt.setFrom(person);
-                    reqt.setUserId(person);
-                    reqt.setMessage(req.getMessage());
-                    queueMutex.lock();
-                    q.push(&reqt);
-                    queueMutex.unlock();
-                }
-                rep.setServerMessage("Send Succesfully ");
-                rep.setStatus(200);
-                break;
-            }
-        }
-    }
-    catch (const exception &e)
-    {
-        rep.setServerMessage("Delete Room request Failed");
-        rep.setStatus(500);
-    }
-    string string_buffer = coder::encode_reply_broadcast_message(rep);
-    send(req.getSocket(), string_buffer.c_str(), string_buffer.size(), 0);
-}
+
 
 // checked
 void privateMessageRequest(request_private_message req)
@@ -502,9 +469,65 @@ void privateMessageRequest(request_private_message req)
         rep.setStatus(500);
         rep.setServerMessage("Failed to transmit a private msg");
     }
+    message_t tmp = rep.getMessage();
+    tmp.setSender( req.getFrom() );
+    rep.setMessage(tmp);
+    reply_private_message repSender(rep);
+    tmp = repSender.getMessage();
+    tmp.setContent("$tilowkey");
+    repSender.setMessage(tmp);
     string string_buffer = coder::encode_reply_private_message(rep);
+    string string_buffer2 = coder::encode_reply_private_message(repSender);
+    send( nameToSocket[ req.getuserId() ], string_buffer.c_str(), string_buffer.size(), 0 );
+    send( req.getSocket(), string_buffer2.c_str(), string_buffer2.size(), 0 );
+}
+
+// checked
+void broadcastRequest(request_broadcast_message req)
+{
+    reply_broadcast_message rep;
+    rep.setChatroomId(req.getchatroomID());
+    rep.setMessage(req.getMessage());
+    try
+    {
+        for (chatroom_t cr : CR)
+        {
+            if (cr.getchatroomID() == req.getchatroomID())
+            {
+                cout << "Found room";
+                for (id person : cr.getMembers())
+                {
+                    cout << "c\n";
+                    if( req.getFrom() == person ){
+                        cout << "HAHA" << '\n'; continue;
+                    }
+                    request_private_message * reqt = new request_private_message();
+                    reqt->setRequestId(req.getrequestId());
+                    reqt->setReqType(PRIVATE_MESSAGE);
+                    reqt->setFrom(req.getFrom());
+                    reqt->setUserId(person);
+                    reqt->setMessage(req.getMessage());
+                    queueMutex.lock();
+                    q.push( reqt );
+                    queueMutex.unlock();
+                    sem_post(&work);
+                }
+                rep.setServerMessage("Send Succesfully ");
+                rep.setStatus(200);
+                break;
+            }
+        }
+    }
+    catch (const exception &e)
+    {
+        rep.setServerMessage("Delete Room request Failed");
+        rep.setStatus(500);
+    }
+    string string_buffer = coder::encode_reply_broadcast_message(rep);
     send(req.getSocket(), string_buffer.c_str(), string_buffer.size(), 0);
 }
+
+
 
 void listUsersRequest(request_list req)
 {
@@ -565,6 +588,7 @@ void *workingThread(void *index)
     {
         sem_wait(&work); // only to avoid bounded waiting
         queueMutex.lock();
+        while(q.empty()){};
         request *req = q.front();
         q.pop();
         queueMutex.unlock();
@@ -603,6 +627,10 @@ void *workingThread(void *index)
         {
             request_broadcast_message *reqn = (request_broadcast_message *)req;
             broadcastRequest(*reqn);
+        }
+        else if ( req->getreqType() == PRIVATE_MESSAGE ){
+            request_private_message *reqn = (request_private_message *) req;
+            privateMessageRequest(*reqn);
         }
         else if (req->getreqType() == list_users)
         {

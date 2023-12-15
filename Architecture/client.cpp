@@ -119,12 +119,17 @@ void * sending( void * IS ){
                 send( *clientSocket, string_buffer.c_str(), string_buffer.size(), 0 );
             }
             else if( type == BROADCAST_MESSAGE ){
+                message_t msg;
+                int roomID; cout << "Pick Room By ID: "; cin >> roomID;
                 string s; cout << "Enter MSG: "; cin >> s;
-                request_broadcast_message req = request_broadcast_message( req );
+                msg.setContent(s);
+                msg.setSender("");
+                msg.setCreated(time(nullptr));
+                request_broadcast_message req = request_broadcast_message( roomID , msg );
+                    
                 string string_buffer = coder::encode_request_broadcast_message( req ); 
-                cout << coder::decode_reply_broadcast_message( string_buffer ) << '\n';
+                send( *clientSocket, string_buffer.c_str(), string_buffer.size(), 0 );
             }
-
             //under evaluation, error in decoding or encoding possibly
             else if( type == list_users ){
                 request_list req = request_list(list_users);
@@ -133,11 +138,16 @@ void * sending( void * IS ){
                 
             }
             else if( type == PRIVATE_MESSAGE ){
+                cout << "here";
                 request_private_message req = request_private_message();
                 string recepient; cout << "Specify Recipient: "; cin >> recepient;
-                message_t msg(  );
-                
-                cout << coder::decode_reply_private_message( string_buffer ) << '\n';
+                string content; cout << "Specify the content: "; cin >> content;
+                time_t timstamp = time(nullptr);
+                message_t msg( "", content, timstamp );
+                req.setMessage( msg );
+                req.setUserId( recepient );
+                string string_buffer = coder::encode_request_private_message( req );
+                send( *clientSocket, string_buffer.c_str(), string_buffer.size(), 0 );
             }
             else if( type == DISCONNECT ){
                 request_disconnect req = request_disconnect( DISCONNECT );
