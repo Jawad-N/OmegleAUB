@@ -288,13 +288,24 @@ void TaskHandler::handle_create_chatroom(OmegleShell &shell)
 
     request_create_CR req(chatroom);
     string encoding = coder::encode_request_create_CR(req);
+    shell.getClient().send_over_socket(encoding);
+    string content = shell.getClient().receive_from_socket();
+    reply_create_CR rep = coder::decode_reply_create_CR(content);
+    if (rep.getStatus() / 200 == 1)
+    {
+        cout << GREEN_TEXT("[server] : Create chatroom " + name + "...\n ");
+    }
+    else
+    {
+        cout << RED_TEXT << "[server] : Create chatroom request failed. Please try again later\n"
+             << RESET_COLOR;
+    }
+    cout << "Reply: \n"
+         << rep << '\n';
 
-    cout << "Chatroom created:\n"
-         << chatroom << '\n';
-    cout << req << '\n';
     // send over the socket
 
-    cout << "handle create chatrooms\n";
+    // cout << "handle create chatrooms\n";
 }
 void TaskHandler::handle_join_chatroom(OmegleShell &shell)
 {
@@ -358,11 +369,27 @@ void TaskHandler::handle_leave_chatroom(OmegleShell &shell)
     cout << BLUE_TEXT("Leaving room " + chatroom_id_str + " ...\n");
     request_JLD_CR req(leave_CR, chatroom_id);
     string encoding = coder::encode_request_JLD_CR(req);
-    cout << req << '\n';
-    cout << "handle leave chatrooms\n";
+    shell.getClient().send_over_socket(encoding);
+    string content = shell.getClient().receive_from_socket();
+    reply_JLD_CR rep = coder::decode_reply_JLD_CR(content);
+    if (rep.getStatus() / 200 == 1)
+    {
+        shell.addchatrooms(chatroom_id);
+        cout << GREEN_TEXT("[server] : Left chatroom " + chatroom_id_str + " successfuly !\n");
+    }
+    else
+    {
+        cout << RED_TEXT << "[server] : Leaving charoom" + chatroom_id_str + " failed. Please try again later.\n"
+             << RESET_COLOR;
+    }
+    cout << "Rep:\n"
+         << rep;
 }
 void TaskHandler::handle_delete_chatroom(OmegleShell &shell)
 {
+    cout << RED_TEXT << "[server] : Option is not supported. Try again next semester :)\n"
+         << RESET_COLOR;
+    return;
     if (!shell.getClient().getActivated())
     {
         cout << RED_TEXT << "[server] : Connect to server first before requesting\n"
@@ -446,7 +473,31 @@ void TaskHandler::handle_private_message(OmegleShell &shell)
              << RESET_COLOR;
         return;
     }
-    cout << "handle private message\n";
+    cout << BLUE_TEXT("[server] : Attempting to private message to user\n");
+    string user_id = Parser::parse_user_input("Enter user id:");
+    // verify that the user is in a member of this room
+    // // // To DO
+    string message_str = Parser::parse_user_input("Enter message: ");
+    message_t message(shell.getClient().getName(), message_str, time(nullptr));
+    request_private_message req(user_id, message);
+    string encoding = coder::encode_request_private_message(req);
+    shell.getClient().send_over_socket(encoding);
+    string content = shell.getClient().receive_from_socket();
+    reply_private_message rep = coder::decode_reply_private_message(content);
+
+    if (rep.getStatus() / 200 == 1)
+    {
+        cout << GREEN_TEXT("[server] : Private message to " + user_id + " was successful !\n");
+        cout << rep << '\n';
+    }
+    else
+    {
+        cout << RED_TEXT << "[server] : Private message to " + user_id + " failed. Try again later\n"
+             << RESET_COLOR;
+    }
+
+    //
+    // cout << "handle private message\n";
 }
 void TaskHandler::handle_display_chatroom_info(OmegleShell &shell)
 {
