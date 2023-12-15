@@ -264,15 +264,32 @@ void reply_private_message::setMessage(const message_t &message_) { message = me
 
 ostream &operator<<(ostream &os, const reply_private_message &rep)
 {
-    os << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -\n";
-    os << static_cast<const reply &>(rep);
-    os << "User     id     : " << rep.getreplyId() << '\n';
-    os << "- - - - - - - - - - - - - - \n";
-    os << "Message         : \n";
-    os << rep.getMessage() << '\n';
-    os << "- - - - - - - - - - - - - - \n";
-    os << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -\n";
-    return os;
+    if (rep.getMessage().getContent() != "$tilowkey")
+    {
+        os << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -\n";
+        os << static_cast<const reply &>(rep);
+        os << "User     id     : " << rep.getreplyId() << '\n';
+        os << "- - - - - - - - - - - - - - \n";
+        os << "Message         : \n";
+        os << rep.getMessage() << '\n';
+        os << "- - - - - - - - - - - - - - \n";
+        os << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -\n";
+        return os;
+    }
+    else
+    {
+        os << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -\n";
+        os << static_cast<const reply &>(rep);
+        os << "User     id     : " << rep.getreplyId() << '\n';
+        os << "- - - - - - - - - - - - - - \n";
+        os << "Message         : Sent successfully\n";
+        os << "Sent at : " << TimeConverter::timeToString(rep.getMessage().getCreated()) << '\n';
+        os << "- - - - - - - - - - - - - - \n";
+        os << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -\n";
+
+        // os << <<rep.getMessage().getCreated();
+        return os;
+    }
 }
 // // // // Main reply_private_message class end // // // //
 

@@ -133,6 +133,7 @@ bool OmegleShell::execute_command(string command)
     }
     catch (exception e)
     {
+        cout << e.what() << '\n';
     }
 
     cout << "Unrecognized command " << '"' << command << '"' << ". Type 'h' for help.\n";
@@ -200,10 +201,13 @@ void TaskHandler::handle_connect(OmegleShell &shell)
 
     // store the request inside the set.
     shell.insertPendingRequestClient(req.getrequestId(), req);
+    cout << "SURE\n";
+    cout.flush();
     // wait to receive request from the server
     // // recv function
     // wait at most 2 seconds for the server to respond.
     string CONTENT = shell.getClient().receive_from_socket();
+    cout << coder::decode_request_connect(CONTENT) << '\n';
     cout << CONTENT << '\n';
     // Receive reply :
     // To-Add

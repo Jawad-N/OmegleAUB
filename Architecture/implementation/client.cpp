@@ -1,5 +1,5 @@
 #include "../headers/client.h"
-
+#include "../headers/coder.h"
 Client::Client()
 {
     setName("");
@@ -51,11 +51,13 @@ void Client::send_over_socket(string message)
 }
 string Client::receive_from_socket()
 {
-    char *buffer;
+    char buffer[1024] = {0};
     int valread = read(getSocketfd(), buffer, sizeof(buffer));
     if (valread == 0)
         cout << "[client] : Error reading from socket\n";
     string string_buffer = (string)buffer;
+    cout << "STRING : " << string_buffer << '\n';
+    cout << "Decoding: " << coder::decode_request_connect(string_buffer) << '\n';
     return string_buffer;
 }
 
