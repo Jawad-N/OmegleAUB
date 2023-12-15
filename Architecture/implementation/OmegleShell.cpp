@@ -6,6 +6,14 @@
 #define RESET_COLOR "\033[0m"
 #define BLUE_TEXT(text) "\033[1;34m" << text << "\033[0m"
 #define GREEN_TEXT(text) "\033[1;32m" << text << "\033[0m"
+#define RESET "\033[0m"
+#define RED "\033[31m"
+#define GREEN "\033[32m"
+#define YELLOW "\033[33m"
+#define BLUE "\033[34m"
+#define MAGENTA "\033[35m"
+#define CYAN "\033[36m"
+#define WHITE "\033[37m"
 // // // // // // Parser class start // // // // // //
 string Parser::trim_spaces(string input)
 {
@@ -49,7 +57,20 @@ bool Parser::parse_int(string message, int &result)
 // void OmegleShell::setUserName(const string &userName) { user_name = userName; }
 OmegleShell::OmegleShell(int socketfd) { client.setSocketfd(socketfd); }
 OmegleShell::OmegleShell() {}
-void OmegleShell::displayWelcome() { cout << "\033[1;32mWelcome to My Bash Script!\033[0m\n"; }
+void OmegleShell::displayWelcome()
+{
+    cout << GREEN << "Welcome to " << BLUE << "omegleAUB" << GREEN << "!" << RESET << std::endl;
+
+    // Print a small ASCII art smiley face
+    cout << "\n"
+         << CYAN << "   *****\n"
+                    "  *     *\n"
+                    " *  O O  *\n"
+                    " *   ∆   *\n"
+                    "  *     *\n"
+                    "   *****\n"
+         << RESET << std::endl;
+}
 void OmegleShell::displayHelp()
 {
     cout << "\033[1;37mOptions:\n"
@@ -144,8 +165,76 @@ bool OmegleShell::execute_command(string command)
     cout << "Unrecognized command " << '"' << command << '"' << ". Type 'h' for help.\n";
     return false;
 }
+
+sem_t jawad;
+
+void *listening(void *passing)
+{
+    OmegleShell *shell = (OmegleShell *)passing;
+
+    while (true)
+    {
+
+        string string_buffer = shell->getClient().receive_from_socket();
+        request_t type = coder::get_encode_reply_type(string_buffer);
+
+        if (type == list_CR)
+        {
+            reply_list_CR rep = coder::decode_reply_list_CR(string_buffer);
+            cout << coder::decode_reply_list_CR(string_buffer) << '\n';
+        }
+        else if (type == connect_CR)
+        {
+            reply_connect rep = coder::decode_reply_connect(string_buffer);
+            cout << rep << '\n';
+        }
+        else if (type == create_CR)
+        {
+            reply_create_CR rep = coder::decode_reply_create_CR(string_buffer);
+            cout << coder::decode_reply_create_CR(string_buffer) << '\n';
+        }
+        else if (type == join_CR)
+        {
+            reply_JLD_CR rep = coder::decode_reply_JLD_CR(string_buffer);
+            cout << coder::decode_reply_JLD_CR(string_buffer) << '\n';
+        }
+        else if (type == leave_CR)
+        {
+            reply_JLD_CR rep = coder::decode_reply_JLD_CR(string_buffer);
+            cout << coder::decode_reply_JLD_CR(string_buffer) << '\n';
+        }
+        else if (type == delete_CR)
+        {
+            reply_JLD_CR rep = coder::decode_reply_JLD_CR(string_buffer);
+            cout << coder::decode_reply_JLD_CR(string_buffer) << '\n';
+        }
+        else if (type == BROADCAST_MESSAGE)
+        {
+            reply_JLD_CR rep = coder::decode_reply_JLD_CR(string_buffer);
+            cout << coder::decode_reply_broadcast_message(string_buffer) << '\n';
+        }
+        else if (type == list_users)
+        {
+            reply_list_users rep = coder::decode_reply_list_users(string_buffer);
+            cout << "USERS: ";
+            for (id pep : rep.getUsers())
+                cout << pep << ' ';
+            cout << '\n';
+        }
+        else if (type == PRIVATE_MESSAGE)
+        {
+            reply_private_message rep = coder::decode_reply_private_message(string_buffer);
+            cout << coder::decode_reply_private_message(string_buffer) << '\n';
+        }
+        cout.flush();
+    }
+}
+
 void OmegleShell::run()
 {
+    // sem_init(jawad, 0, 0);
+    // pthread_t listen;
+    // pthread_create(&listen, NULL, listening, this);
     displayWelcome();
     while (true)
     {
@@ -547,8 +636,6 @@ void TaskHandler::handle_disconnect(OmegleShell &shell)
 void TaskHandler::handle_display_chatroom_message_history(OmegleShell &shell) { cout << "handle display chatroom message history\n"; }
 // // // // // // Task Handler end // // // // // // //
 
-
-
-void TaskHandler::handle_create_chatroom(OmegleShell &shell){
-    
-}
+// void TaskHandler::handle_create_chatroom(OmegleShell &shell)
+// {
+// }
