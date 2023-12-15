@@ -405,14 +405,15 @@ void deleteRequest(request_JLD_CR req)
                     {
                         if (s != cr.getOwner())
                         {
-                            request_JLD_CR reqt;
-                            reqt.setChatroomID(req.getchatroomID());
-                            reqt.setRequestId(req.getrequestId());
-                            reqt.setFrom(s);
-                            reqt.setReqType(leave_CR);
+                            request_JLD_CR* reqt = new request_JLD_CR();
+                            reqt->setChatroomID(req.getchatroomID());
+                            reqt->setRequestId(req.getrequestId());
+                            reqt->setFrom(s);
+                            reqt->setReqType(leave_CR);
                             queueMutex.lock();
-                            q.push(&reqt); // requesting people to leave the chatroom before deletion
+                            q.push( reqt ); // requesting people to leave the chatroom before deletion
                             queueMutex.unlock();
+                            sem_post(&work);
                         }
                     }
                     queueMutex.lock();
