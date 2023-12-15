@@ -22,6 +22,7 @@ private:
     pthread_t w_thread;                           // thread for writing
     map<int, vector<message_t>> chatroom_history; // chat history of the chatrooms.
     bool activated;
+    int socketfd;
 
 public:
     Client(id username);
@@ -48,4 +49,7 @@ public:
     void setWThread(const pthread_t &wThread);
 
     void insertPendingRequest(int request_id, request req);
+
+    int getSocketfd() const;
+    void setSocketfd(int socketfd_);
 };

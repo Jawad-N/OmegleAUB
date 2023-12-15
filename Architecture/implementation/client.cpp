@@ -40,3 +40,6 @@ void Client::insertPendingRequest(int request_id, request req)
 {
     pending_requests[request_id] = req;
 }
+
+int Client::getSocketfd() const { return socketfd; }
+void Client::setSocketfd(int socketfd_) { socketfd = socketfd_; }

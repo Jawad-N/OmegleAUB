@@ -38,6 +38,8 @@ private:
     Client client;
 
 public:
+    OmegleShell(int socketfd);
+    OmegleShell();
     void displayWelcome();
     void displayHelp();
     void displayPrompt();

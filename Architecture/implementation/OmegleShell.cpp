@@ -47,6 +47,8 @@ bool Parser::parse_int(string message, int &result)
 // // // // // // OmegleShell start // // // // // // //
 // string OmegleShell::getuserName() const { return user_name; }
 // void OmegleShell::setUserName(const string &userName) { user_name = userName; }
+OmegleShell::OmegleShell(int socketfd) { client.setSocketfd(socketfd); }
+OmegleShell::OmegleShell() {}
 void OmegleShell::displayWelcome() { cout << "\033[1;32mWelcome to My Bash Script!\033[0m\n"; }
 void OmegleShell::displayHelp()
 {
