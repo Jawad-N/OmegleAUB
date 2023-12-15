@@ -31,3 +31,15 @@ int main()
 
    
     
+/*
+    string string_buffer = coder::encode_request_disconnect( req ); //corresponding encoding
+    send( *clientSocket, string_buffer.c_str(), string_buffer.size(), 0);
+
+*/
+
+/*
+    valread = read( *clientSocket, buffer, sizeof(buffer) );
+    string string_buffer = (string) buffer;
+    request_t type = coder::get_encode_reply_type(string_buffer);
+    
+*/
