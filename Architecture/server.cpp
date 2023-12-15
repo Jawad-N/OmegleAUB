@@ -140,6 +140,7 @@ void *listeningThread(void *IC)
 }
 
 // checked
+// Called from Client
 void connectRequest(request_connect req)
 {
     reply_connect rep;
@@ -205,6 +206,7 @@ void listRequest(request_list req)
 int roomCount = 0;
 // TODO
 // checked
+//
 void createRequest(request_create_CR req)
 {
     reply_create_CR rep;
@@ -226,6 +228,7 @@ void createRequest(request_create_CR req)
 
     string string_buffer = coder::encode_reply_create_CR(rep);
     send(req.getSocket(), string_buffer.c_str(), string_buffer.size(), 0);
+    for( chatroom_t cr: CR) cout << cr << '\n';
 }
 
 // checked

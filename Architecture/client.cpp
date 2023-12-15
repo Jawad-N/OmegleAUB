@@ -29,17 +29,13 @@ void * listening( void * IS ){
     while( true ){
         char buffer[ 1024 ] = { 0 };
         ssize_t valread = 0 ;
-        cout << "pre: " << valread << '\n';
         cout.flush();
         valread = read( *clientSocket, buffer, sizeof(buffer) );
-        cout << "post: " << valread << '\n';
         cout.flush();
         string string_buffer = (string) buffer;
-        request_t type = typecoder::get_encode_reply_type(string_buffer);
-        if( type == connect_CR ){
-            cout << coder::decode_reply_connect( string_buffer ) << '\n';
-        }
-        else if( type == list_CR ){
+        request_t type = coder::get_encode_reply_type(string_buffer);
+        
+        if( type == list_CR ){
             cout << coder::decode_reply_list_CR( string_buffer ) << '\n';
         }
         else if( type == create_CR ){
@@ -76,13 +72,45 @@ void * listening( void * IS ){
 
 void * sending( void * IS ){
     
-    int * clientScoket = ( int* ) IS;
-    
-    assume we have the type and the request elements
-
+    int * clientSocket = ( int* ) IS;
+    usleep(1000000);
+    int n; cout << "pick command 1-->10: "; cin >> n;
+    request_t type = (request_t)n;
     try{
-
-        
+        cout << type << '\n';
+        if( type == list_CR ){
+            chatroom_t newRoom = chatroom_t();
+            newRoom.setCapacity(10);
+            newRoom.setDescription("ACM Club");
+            
+            request_create_CR req = request_create_CR( newRoom );
+            char buffer[1024] = { 0 };
+            send( *clientSocket, )
+        }
+        // else if( type == create_CR ){
+        //     cout << coder::decode_reply_create_CR( string_buffer ) << '\n';
+        // }
+        // else if( type == join_CR ){
+        //     cout << coder::decode_reply_JLD_CR( string_buffer ) << '\n';
+        // }
+        // else if( type == leave_CR ){
+        //     cout << coder::decode_reply_JLD_CR( string_buffer ) << '\n';
+        // }
+        // else if( type == delete_CR ){
+        //     cout << coder::decode_reply_JLD_CR( string_buffer ) << '\n';
+        // }
+        // else if( type == BROADCAST_MESSAGE ){
+        //     cout << coder::decode_reply_broadcast_message( string_buffer ) << '\n';
+        // }
+        // else if( type == list_users ){
+        //     cout << coder::decode_reply_list_users( string_buffer ) << '\n';
+        // }
+        // else if( type == PRIVATE_MESSAGE ){
+        //     cout << coder::decode_reply_private_message( string_buffer ) << '\n';
+        // }
+    }
+    catch( const exception &e ){
+        cout << "Input error" << '\n';
     }
 
     
@@ -103,9 +131,7 @@ int main(){
     pthread_t listeningThread;
     pthread_t sendingThread;
 
-    string nameHandle;
-    cout << "Specify Username Please: "; cin >> nameHandle;
-
+   
     int clientSocket ;
     if( ( clientSocket = (clientSocket = socket(AF_INET, SOCK_STREAM, 0) ) ) < 0 );
     struct sockaddr_in serverAddress;
@@ -127,15 +153,35 @@ int main(){
         return -1;
     }
 
+
+    char buffer[ 1024 ] = { 0 };
+    bool connect = false;
+    string nameHandle; cout << "Specify Username Please: "; cin >> nameHandle;
     request_connect req(nameHandle);
     string string_buffer = coder::encode_request_connect(req);
     send(clientSocket, string_buffer.c_str(), string_buffer.size(), 0);
+
+    int valread = read( clientSocket, buffer, sizeof(buffer) );
+    reply_connect rep =  coder::decode_reply_connect( buffer );
+    if( rep.getserverMessage() == "Connected Succesfully" ) connect = true;
+    while( !connect ){
+        string nameHandle;
+        cout << rep.getserverMessage() <<'\n';
+        cout << "Please Provide A Different Username: "; cin >> nameHandle;
+        request_connect reqRetry(nameHandle);
+        string string_buffer = coder::encode_request_connect(reqRetry);
+        memset(buffer, '\0', sizeof(buffer));
+        send(clientSocket, string_buffer.c_str(), string_buffer.size(), 0);
+        valread = read( clientSocket, buffer, sizeof(buffer) );
+        rep = coder::decode_reply_connect( buffer );
+        if( rep.getserverMessage() == "Connected Succesfully" ) connect = true;
+    }
+    cout << rep << '\n';
     pthread_create( &listeningThread, NULL, listening, &clientSocket);
-    // pthread_create( &sendingThread, NULL, sending, &clientSocket );
+    pthread_create( &sendingThread, NULL, sending, &clientSocket );
     void * status2;
     pthread_join(listeningThread, &status2);
     pthread_join(sendingThread, &status2);
-
 
     return 0;
 }
