@@ -129,7 +129,7 @@ void *listeningThread(void *IC)
         {
             close(*incomingSocket);
             exit(0);
-            queueMutex.unlock();
+            // queueMutex.unlock();
             break; // when disonnecting, reach pthread_exit to kill the thread
         }
         else
@@ -177,6 +177,7 @@ void connectRequest(request_connect req)
         rep.setStatus(500);
         rep.setServerMessage("Could not connect succesfully");
     }
+    cout << rep << '\n';
     string string_buffer = coder::encode_reply_connect(rep);
     send(req.getSocket(), string_buffer.c_str(), string_buffer.size(), 0);
 }
