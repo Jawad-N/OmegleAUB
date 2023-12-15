@@ -74,6 +74,11 @@ void OmegleShell::displayPrompt() { cout << "\033[1;32m" + (client.getName() == 
 void OmegleShell::displayHistory() { cout << user_command_history << '\n'; }
 void OmegleShell::insertPendingRequestClient(int request_id, request req) { client.insertPendingRequest(request_id, req); }
 
+bool OmegleShell::addchatrooms(int chatroom_id)
+{
+    client.addchatrooms(chatroom_id);
+    return true;
+}
 bool OmegleShell::execute_command(string command)
 {
     int command_int = -1;
@@ -201,28 +206,26 @@ void TaskHandler::handle_connect(OmegleShell &shell)
 
     // store the request inside the set.
     shell.insertPendingRequestClient(req.getrequestId(), req);
-    cout << "SURE\n";
-    cout.flush();
-    // wait to receive request from the server
-    // // recv function
-    // wait at most 2 seconds for the server to respond.
-    string CONTENT = shell.getClient().receive_from_socket();
-    cout << coder::decode_request_connect(CONTENT) << '\n';
-    cout << CONTENT << '\n';
-    // Receive reply :
-    // To-Add
-    string encoding_reply = "";
-    // // Switch case for the decoding
 
-    if (true) // if reply successful
+    string CONTENT = shell.getClient().receive_from_socket();
+    reply_connect rep = coder::decode_reply_connect(CONTENT);
+    // cout << coder::decode_reply_connect(CONTENT) << '\n';
+    cout << "Reply : " << rep << '\n';
+    string encoding_reply = "";
+
+    if (rep.getStatus() / 200 <= 1) // if reply successful
     {
         shell.setClientName(user_name);
         shell.setClientActivated(true);
+        cout << GREEN_TEXT("[server] : Welcome " + user_name + " to omegleAUB\n");
+    }
+    else
+    {
+        cout << RED_TEXT << "[server] : Connection failed. Please try again later.\n"
+             << RESET_COLOR;
     }
 
     // shell.setUserName(user_name);
-    cout
-        << "handle connect\n";
 }
 void TaskHandler::handle_list_chatrooms(OmegleShell &shell)
 {
@@ -236,19 +239,27 @@ void TaskHandler::handle_list_chatrooms(OmegleShell &shell)
     request_list req(list_CR);
     string encoding = coder::encode_request_list(req);
     // send encoding over the network
-    shell.insertPendingRequestClient(req.getrequestId(), req);
+    // shell.insertPendingRequestClient(req.getrequestId(), req);
+    shell.getClient().send_over_socket(encoding);
+    string content = shell.getClient().receive_from_socket();
+    reply_list_CR rep = coder::decode_reply_list_CR(content);
+    cout << rep << '\n';
 
     // receive reply
     // To-Add :
-    if (false)
+    if (rep.getStatus() / 200 == 1)
     {
         // display_chatrooms();
-        string decoding = "";
+        cout << GREEN_TEXT("[server] : Listing available chatrooms ...\n ");
 
-        reply_list_CR rep = coder::decode_reply_list_CR(decoding);
         cout << "Available chatrooms:\n";
         for (chatroom_t &chatroom : rep.getChatrooms())
             cout << chatroom << '\n';
+    }
+    else
+    {
+        cout << RED_TEXT << "[server] request for listing chatrooms failed. Please try again later\n"
+             << RESET_COLOR;
     }
 
     cout << "handle list chatrooms\n";
@@ -274,11 +285,12 @@ void TaskHandler::handle_create_chatroom(OmegleShell &shell)
     capacity = min(max(1, capacity), 40);
     string description = Parser::parse_user_input("Enter description of this chatroom: ");
     chatroom_t chatroom(-1, name, capacity, shell.getClient().getName(), time(nullptr), description);
-    cout << "Chatroom created:\n"
-         << chatroom << '\n';
 
     request_create_CR req(chatroom);
     string encoding = coder::encode_request_create_CR(req);
+
+    cout << "Chatroom created:\n"
+         << chatroom << '\n';
     cout << req << '\n';
     // send over the socket
 
@@ -304,13 +316,27 @@ void TaskHandler::handle_join_chatroom(OmegleShell &shell)
     cout << BLUE_TEXT("Joining room " + chatroom_id_str + " ...\n");
     request_JLD_CR req(join_CR, chatroom_id);
     string encoding = coder::encode_request_JLD_CR(req);
-    cout << req << '\n';
+
+    shell.getClient().send_over_socket(encoding);
+    string content = shell.getClient().receive_from_socket();
+    reply_JLD_CR rep = coder::decode_reply_JLD_CR(content);
+    if (rep.getStatus() / 200 == 1)
+    {
+        shell.addchatrooms(chatroom_id);
+        cout << GREEN_TEXT("[server] : Joined chatroom " + chatroom_id_str + " successfuly !\n");
+    }
+    else
+    {
+        cout << RED_TEXT << "[server] : Joining charoom" + chatroom_id_str + " failed. Please try again later.\n"
+             << RESET_COLOR;
+    }
+    // cout << req << '\n';
     //
     // //
     // // // Send over tcp sockets.
     // //
     //
-    cout << "handle join chatrooms\n";
+    // cout << "handle join chatrooms\n";
 }
 void TaskHandler::handle_leave_chatroom(OmegleShell &shell)
 {
@@ -381,14 +407,26 @@ void TaskHandler::handle_broadcast_message(OmegleShell &shell)
     message_t message(shell.getClient().getName(), message_str, time(nullptr));
     request_broadcast_message req(chatroom_id, message);
     string encoding = coder::encode_request_broadcast_message(req);
-    cout << req << '\n';
+    shell.getClient().send_over_socket(encoding);
+    string content = shell.getClient().receive_from_socket();
+    reply_broadcast_message rep = coder::decode_reply_broadcast_message(content);
+
+    if (rep.getStatus() / 200 == 1)
+    {
+        cout << GREEN_TEXT("[server] : Broadcasting message to " + chatroom_id_str + " was successful !\n");
+        cout << rep << '\n';
+    }
+    else
+    {
+        cout << RED_TEXT << "[server] : Broadcasting message to " + chatroom_id_str + " failed. Try again later\n"
+             << RESET_COLOR;
+    }
+
     //
     // //
     // // // Send them over sockets
     // //
     //
-    cout
-        << "handle broadcast message\n";
 }
 void TaskHandler::handle_list_users(OmegleShell &shell)
 {
@@ -432,19 +470,27 @@ void TaskHandler::handle_disconnect(OmegleShell &shell)
     cout << BLUE_TEXT("[server] : Attempting to disconnect\n");
     // create request_disconnect.
     request_disconnect req;
-    cout << req << '\n';
-
     // encoding request_disconnect.
     string encoding = coder::encode_request_disconnect(req);
+
+    shell.getClient().send_over_socket(encoding);
+    cout << GREEN_TEXT("[server] : User" + shell.getClient().getName() + " disconnected\n");
+
+    // string decoding = shell.getClient().receive_from_socket();
+    // reply_disconnect rep = coder::decode_reply_disconnect(decoding);
+    // cout << rep << '\n';
     // send the request_disconnect.
 
     // wait for reply.
     // if successful, flush all the data structures of the user
-    if (true)
-    {
-        shell.setClientName("");
-        shell.setClientActivated(false);
-    }
+    // if (rep.getStatus() / 200 == 1)
+    // {
+    // shell.setClientName("");
+    // shell.setClientActivated(false);
+    // }
+    // else
+    // {
+    // }
     cout << "handle disconnect\n";
 }
 void TaskHandler::handle_display_chatroom_message_history(OmegleShell &shell) { cout << "handle display chatroom message history\n"; }

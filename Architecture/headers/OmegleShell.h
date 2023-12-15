@@ -54,6 +54,8 @@ public:
     void setClientActivated(bool activate);
     void insertPendingRequestClient(int request_id, request req);
 
+    bool addchatrooms(int chatroom_id);
+
     // string getuserName() const;
     // void setUserName(const string &userName);
 };

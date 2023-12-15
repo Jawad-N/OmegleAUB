@@ -56,4 +56,6 @@ public:
 
     void send_over_socket(string message);
     string receive_from_socket();
+
+    bool addchatrooms(int chatroom_id);
 };

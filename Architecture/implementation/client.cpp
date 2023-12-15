@@ -51,16 +51,27 @@ void Client::send_over_socket(string message)
 }
 string Client::receive_from_socket()
 {
+    int valread = 0;
     char buffer[1024] = {0};
-    int valread = read(getSocketfd(), buffer, sizeof(buffer));
+    while ((valread = read(getSocketfd(), buffer, sizeof(buffer))) <= 0)
+    {
+        1 == 1;
+    }
     if (valread == 0)
         cout << "[client] : Error reading from socket\n";
-    string string_buffer = (string)buffer;
-    cout << "STRING : " << string_buffer << '\n';
-    cout << "Decoding: " << coder::decode_request_connect(string_buffer) << '\n';
-    return string_buffer;
+    // string string_buffer = (string)buffer;
+    string string_buffer(buffer, valread);
+    // cout
+    // << "STRING : " << string_buffer << '\n';
+    // cout << "Decoding: " << coder::decode_request_connect(string_buffer) << '\n';
+    return string(string_buffer);
 }
+bool Client::addchatrooms(int chatroom_id)
+{
 
+    chatrooms.insert(chatroom_id);
+    return true;
+}
 /*
 string string_buffer = coder::encode_request_disconnect( req ); //corresponding encoding
 send( *clientSocket, string_buffer.c_str(), string_buffer.size(), 0);
