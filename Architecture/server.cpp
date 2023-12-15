@@ -43,11 +43,14 @@ void *listeningThread(void *IC)
         cout << valread << '\n';
         cout << "received" << buffer << '\n';
         bool flag = false;
-        if (socketToName.find(*incomingSocket) != socketToName.end())
-            flag = true;
+        if (socketToName.find(*incomingSocket) != socketToName.end()) flag = true;
         string string_buffer = (string)buffer;
+        cout << "Here\n";
+        cout << string_buffer << '\n';
+        cout.flush();
         request_t type = coder::get_encode_request_type(string_buffer);
         cout << "TYPE RECEIVED: " << (int)type << '\n';
+        cout.flush();
         queueMutex.lock();
         if (type == connect_CR)
         {
@@ -127,9 +130,9 @@ void *listeningThread(void *IC)
         }
         else if (type == DISCONNECT)
         {
+            queueMutex.unlock();
             close(*incomingSocket);
             exit(0);
-            // queueMutex.unlock();
             break; // when disonnecting, reach pthread_exit to kill the thread
         }
         else
@@ -493,18 +496,20 @@ void broadcastRequest(request_broadcast_message req)
                 cout << "Found room";
                 for (id person : cr.getMembers())
                 {
+                    cout << "c\n";
                     if( req.getFrom() == person ){
                         cout << "HAHA" << '\n'; continue;
                     }
-                    request_private_message reqt;
-                    reqt.setRequestId(req.getrequestId());
-                    reqt.setReqType(PRIVATE_MESSAGE);
-                    reqt.setFrom(req.getFrom());
-                    reqt.setUserId(person);
-                    reqt.setMessage(req.getMessage());
+                    request_private_message * reqt = new request_private_message();
+                    reqt->setRequestId(req.getrequestId());
+                    reqt->setReqType(PRIVATE_MESSAGE);
+                    reqt->setFrom(req.getFrom());
+                    reqt->setUserId(person);
+                    reqt->setMessage(req.getMessage());
                     queueMutex.lock();
-                    q.push(&reqt);
+                    q.push( reqt );
                     queueMutex.unlock();
+                    sem_post(&work);
                 }
                 rep.setServerMessage("Send Succesfully ");
                 rep.setStatus(200);
@@ -582,6 +587,7 @@ void *workingThread(void *index)
     {
         sem_wait(&work); // only to avoid bounded waiting
         queueMutex.lock();
+        while(q.empty()){};
         request *req = q.front();
         q.pop();
         queueMutex.unlock();
