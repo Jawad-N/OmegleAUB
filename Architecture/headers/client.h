@@ -1,4 +1,5 @@
 #pragma once
+#include "includes.h"
 #include "structures.h"
 #include "request.h"
 #include "reply.h"
@@ -52,4 +53,7 @@ public:
 
     int getSocketfd() const;
     void setSocketfd(int socketfd_);
+
+    void send_over_socket(string message);
+    string receive_from_socket();
 };

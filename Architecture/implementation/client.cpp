@@ -43,3 +43,24 @@ void Client::insertPendingRequest(int request_id, request req)
 
 int Client::getSocketfd() const { return socketfd; }
 void Client::setSocketfd(int socketfd_) { socketfd = socketfd_; }
+
+void Client::send_over_socket(string message)
+{
+
+    send();
+}
+string Client::receive_from_socket() {}
+
+/*
+string string_buffer = coder::encode_request_disconnect( req ); //corresponding encoding
+send( *clientSocket, string_buffer.c_str(), string_buffer.size(), 0);
+
+*/
+
+/*
+    char * buffer;
+    valread = read( *clientSocket, buffer, sizeof(buffer) );
+    string string_buffer = (string) buffer;
+    request_t type = coder::get_encode_reply_type(string_buffer);
+
+*/
