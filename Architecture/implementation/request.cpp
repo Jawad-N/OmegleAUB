@@ -73,14 +73,14 @@ request_connect::request_connect() : request()
 
 request_connect::request_connect(const request &other) : request(other)
 {
-    if (other.getreqType() != connect_CR )
+    if (other.getreqType() != connect_CR)
         throw runtime_error("[server] : Error creating request_connect from request constructor. reqtype incompatible");
     setUserName("");
 }
 
 request_connect::request_connect(const request_connect &other) : request(other)
 {
-    if (other.getreqType() != connect_CR )
+    if (other.getreqType() != connect_CR)
         throw runtime_error("[server] : Error creating request_connect from request constructor. reqtype incompatible");
     setUserName(other.getuserName());
 }
@@ -281,7 +281,7 @@ ostream &operator<<(ostream &os, const request_private_message &req)
 }
 // // // // // request_private_message_end // // // // //
 // // // // // request_disconnect_start // // // // //
-request_disconnect::request_disconnect() : request() { setReqType(DISCONNECT); };
+request_disconnect::request_disconnect() : request(DISCONNECT){};
 request_disconnect::request_disconnect(const request &other) : request(other)
 {
     if (other.getreqType() != DISCONNECT)
