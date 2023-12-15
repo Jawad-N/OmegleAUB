@@ -1,7 +1,9 @@
 #pragma once
-#include "structures.h"
+
+#include "includes.h"
 #include "request.h"
 #include "reply.h"
+#include "coder.h"
 
 class Client
 {
@@ -21,11 +23,44 @@ private:
     pthread_t l_thread;                           // thread for listening
     pthread_t w_thread;                           // thread for writing
     map<int, vector<message_t>> chatroom_history; // chat history of the chatrooms.
-    bool activated;
+    bool activated;                               // set act activated to true
 
 public:
-    Client(id username);
     Client();
+
+    // Constructors
+    void C_connect(id name);
+    void C_handle_connect();
+
+    void C_disconnect();
+    void C_handle_disconnect();
+
+    void C_list_chatrooms();
+    void C_handle_list_chatrooms();
+
+    void C_query_chatroom(int chatroom_id);
+    void C_handle_query_chatroom();
+
+    void C_leave_chatroom();
+    void C_handle_leave_chatroom();
+
+    void C_delete_chatroom();
+    void C_handle_delete_chatroom();
+
+    void C_broadcast_message(int chatroom_id, string message);
+    void C_handle_broadcast_message();
+
+    void C_list_users();
+    void C_handle_list_users();
+
+    void C_private_message(id user, string message);
+    void C_handle_private_message();
+
+    void C_query_again(int query_id);
+    void C_handle_query_again();
+
+    // Setters and getting
+
     id getName() const;
     void setName(const id &name_);
 
@@ -47,5 +82,19 @@ public:
     pthread_t getwThread() const;
     void setWThread(const pthread_t &wThread);
 
-    void insertPendingRequest(int request_id, request req);
+    // Setters and getters
 };
+
+// connect ()
+// connect_CR , list_chat_rooms , join_chatroom , leave_chatroom, delete_chatroom, l
+// connect_CR = 0,
+//     list_CR = 1,
+//     create_CR = 2,
+//     join_CR = 3,
+//     leave_CR = 4,
+//     delete_CR = 5,
+//     BROADCAST_MESSAGE = 6,
+//     list_users = 7,
+//     PRIVATE_MESSAGE = 8,
+//     DISCONNECT = 9,
+//     connect_USR = 10
