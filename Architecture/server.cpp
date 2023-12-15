@@ -39,29 +39,19 @@ void *listeningThread(void *IC)
         while( ( valread = read(*incomingSocket, buffer, sizeof(buffer)) ) == 0 ){
         1==1;
         }
-        cout << typeid(valread).name() << '\n';
+        cout << valread << '\n';
         cout << "received" << buffer << '\n';
         bool flag = false;
         if (socketToName.find(*incomingSocket) != socketToName.end()) flag = true;
-        cout << "here2\n"; cout.flush();
-        cout.flush();
         string string_buffer = (string)buffer;
-        cout << "here3\n"; cout.flush();
         request_t type = coder::get_encode_request_type(string_buffer);
-        cout << "here4\n"; cout.flush();
+        cout << "TYPE RECEIVED: " << (int)type << '\n';
         queueMutex.lock();
-        cout << "here5\n"; cout.flush();
-        cout << type << '\n';
         if (type == connect_CR)
-        {
-            cout << "here\n";
-            cout.flush();
-            request_connect req = coder::decode_request_connect(string_buffer);
+        {            request_connect req = coder::decode_request_connect(string_buffer);
             req.setSocket( *incomingSocket );
-            cout << "Here\n";
             if (flag) req.getFrom() = socketToName[*incomingSocket];
             q.push(&req);
-            cout << "Here9\n";
         }
         else if (type == list_CR)
         {
@@ -73,8 +63,11 @@ void *listeningThread(void *IC)
         else if (type == create_CR)
         {
             request_create_CR req = coder::decode_request_create_CR(string_buffer);
+            req.setFrom( "menjarib" ) ;
+            cout << "I'M INSTANCE: "<< req.getFrom() << "\n";
             req.setSocket( *incomingSocket );
             if (flag) req.getFrom() = socketToName[*incomingSocket];
+            
             q.push(&req);
         }
         else if (type == join_CR)
@@ -93,7 +86,9 @@ void *listeningThread(void *IC)
         }
         else if (type == delete_CR)
         {
+            
             request_JLD_CR req = coder::decode_request_JLD_CR(string_buffer);
+            cout << " DECODING CHECK: " << req.getchatroomID() << '\n';
             req.setSocket( *incomingSocket );
             if (flag) req.getFrom() = socketToName[*incomingSocket];
             q.push(&req);
@@ -121,6 +116,8 @@ void *listeningThread(void *IC)
         }
         else if (type == DISCONNECT)
         {
+            close(*incomingSocket);
+            exit(0);
             queueMutex.unlock();
             break; // when disonnecting, reach pthread_exit to kill the thread
         }
@@ -171,8 +168,6 @@ void connectRequest(request_connect req)
         rep.setStatus(500);
         rep.setServerMessage("Could not connect succesfully");
     }
-    cout << req.getSocket()  << '\n';
-    cout << rep <<'\n';
     string string_buffer = coder::encode_reply_connect(rep);
     send(req.getSocket(), string_buffer.c_str(), string_buffer.size(), 0);
 }
@@ -213,8 +208,31 @@ void createRequest(request_create_CR req)
     rep.setRepType(create_CR);
     rep.setReplyId(req.getrequestId());
     chatroom_t cur = req.getChatroom();
+    cur.setOwner( socketToName[ req.getSocket() ] );
+    cur.setChatroomID( roomCount++ );
     try
     {
+        set<id> tempSet = cur.getMembers();
+        cout << "tempset1: ";
+        for( id person: tempSet){
+            cout << person << ' ' ;
+        }
+        cout << endl;
+
+        tempSet.insert( req.getFrom() );
+
+        cout << "tempset2: ";
+        for( id person: tempSet){
+            cout << person << ' ' ;
+        }
+        cout << endl;
+
+        cur.setMembers( tempSet ); 
+        cout << "cur: ";
+        for( id person: cur.getMembers() ){
+            cout << person << ' '; 
+        }
+        cout << endl;
         rep.setChatroom(cur);
         CR.insert(cur);
         rep.setServerMessage("created Room succesfully");
@@ -229,11 +247,13 @@ void createRequest(request_create_CR req)
     string string_buffer = coder::encode_reply_create_CR(rep);
     send(req.getSocket(), string_buffer.c_str(), string_buffer.size(), 0);
     for( chatroom_t cr: CR) cout << cr << '\n';
+    cout << "CR SIZE IS: " << CR.size() << '\n';
 }
 
 // checked
 void joinRequest(request_JLD_CR req)
 {
+    cout << "GETFROM: " << req.getFrom();
     reply_JLD_CR rep;
     rep.setRepType(join_CR);
     rep.setReplyId(req.getrequestId());
@@ -245,10 +265,22 @@ void joinRequest(request_JLD_CR req)
         {
             if (cr.getchatroomID() == req.getchatroomID())
             {   
-                set<id> tempSet = cr.getMembers();
-                tempSet.insert( req.getFrom() );
-                cr.setMembers(tempSet);
-                flag = true;
+                cout << "Pending is: " << req.getFrom() << '\n';
+                cout << "MEMBERS OF CR: ";
+                for(id name: cr.getMembers()){
+                    cout << name << ' ';
+                }
+                cout << '\n';
+                if( cr.getMembers().find( req.getFrom() ) == cr.getMembers().end() ){
+                    rep.setServerMessage("You Are Already In That Room");
+                }
+                else{
+                    rep.setServerMessage("Joined Desired Room");
+                    set<id> tempSet = cr.getMembers();
+                    tempSet.insert( req.getFrom() );
+                    cr.setMembers(tempSet);
+                    flag = true;
+                }
                 break;
             }
         }
@@ -273,26 +305,31 @@ void joinRequest(request_JLD_CR req)
 void leaveRequest(request_JLD_CR req)
 {
     reply_JLD_CR rep;
-    rep.setRepType(leave_CR);
-    rep.setReplyId(req.getrequestId());
+    rep.setRepType( leave_CR );
+    rep.setReplyId( req.getrequestId() );
     try
     {
         bool flag = false;
-        for (chatroom_t cr : CR)
-        {
+        for (chatroom_t cr : CR){
             if (cr.getchatroomID() == req.getrequestId())
-            {
-                set<id> tempSet = cr.getMembers();
-                tempSet.erase( req.getFrom() );
-                cr.setMembers( tempSet );
-                rep.setServerMessage("left room");
-                rep.setStatus(200);
+            {   
+                if( cr.getMembers().find( req.getFrom() ) != cr.getMembers().end() ){
+                    set<id> tempSet = cr.getMembers();
+                    tempSet.erase( req.getFrom() );
+                    cr.setMembers( tempSet );
+                    string temp = "Left Room" + cr.getName();
+                    rep.setServerMessage( temp );
+                    rep.setStatus(200);
+                }
+                else{
+                    rep.setServerMessage("Not In That Room To Begin With");
+                    rep.setStatus(200);
+                }
                 flag = true;
             }
         }
-        if (!flag)
-        {
-            rep.setServerMessage("Not in that chatroom");
+        if (!flag){
+            rep.setServerMessage("ChatRoom Does Not Exist");
             rep.setStatus(200);
         }
     }
@@ -311,6 +348,7 @@ void deleteRequest(request_JLD_CR req)
     reply_JLD_CR rep;
     rep.setRepType(delete_CR);
     rep.setReplyId(req.getrequestId());
+    
     try
     {
         bool flag = false;
@@ -318,7 +356,12 @@ void deleteRequest(request_JLD_CR req)
         {
             if (cr.getchatroomID() == req.getchatroomID())
             {
-                if (cr.getMembers().size() != 1)
+                if( cr.getOwner() != req.getFrom() ){
+                    rep.setServerMessage(" You Do Not Have Owner Priviliges ");
+                    rep.setStatus(200);
+                    
+                }
+                else if (cr.getMembers().size() > 1)
                 {
                     for (id s : cr.getMembers())
                     {
@@ -337,12 +380,11 @@ void deleteRequest(request_JLD_CR req)
                     queueMutex.lock();
                     q.push(&req);
                     queueMutex.unlock();
-                    rep.setServerMessage("delete chatroom request delayed until room is empty");
+                    rep.setServerMessage("Delete Chatroom Request Delayed Until Room Is Empty");
                     rep.setStatus(200);
                 }
                 else
                 {
-
                     CR.erase(cr);
                     rep.setServerMessage("Room Deleted Succesfully");
                     rep.setStatus(200);
@@ -483,7 +525,6 @@ void *workingThread(void *index)
     while (true)
     {   
         sem_wait(&work); // only to avoid bounded waiting
-        cout << "balash el she8el\n";
         queueMutex.lock();
         request *req = q.front();
         q.pop();
@@ -491,11 +532,8 @@ void *workingThread(void *index)
 
         if (req->getreqType() == connect_CR)
         {
-            cout << "Ana hone\n";
-            cout.flush();
             request_connect *reqn = (request_connect *)req;
             connectRequest(*reqn);
-            cout << "Ana after\n";
         }
         else if (req->getreqType() == list_CR)
         {

@@ -73,46 +73,74 @@ void * listening( void * IS ){
 void * sending( void * IS ){
     
     int * clientSocket = ( int* ) IS;
-    usleep(1000000);
-    int n; cout << "pick command 1-->10: "; cin >> n;
-    request_t type = (request_t)n;
-    try{
+    while(true){
+        int n; cout << "pick command 1-->10: "; cin >> n; 
+        request_t type = (request_t)n;
         cout << type << '\n';
-        if( type == list_CR ){
-            chatroom_t newRoom = chatroom_t();
-            newRoom.setCapacity(10);
-            newRoom.setDescription("ACM Club");
-            
-            request_create_CR req = request_create_CR( newRoom );
-            char buffer[1024] = { 0 };
-            send( *clientSocket, )
-        }
-        // else if( type == create_CR ){
-        //     cout << coder::decode_reply_create_CR( string_buffer ) << '\n';
-        // }
-        // else if( type == join_CR ){
-        //     cout << coder::decode_reply_JLD_CR( string_buffer ) << '\n';
-        // }
-        // else if( type == leave_CR ){
-        //     cout << coder::decode_reply_JLD_CR( string_buffer ) << '\n';
-        // }
-        // else if( type == delete_CR ){
-        //     cout << coder::decode_reply_JLD_CR( string_buffer ) << '\n';
-        // }
-        // else if( type == BROADCAST_MESSAGE ){
-        //     cout << coder::decode_reply_broadcast_message( string_buffer ) << '\n';
-        // }
-        // else if( type == list_users ){
-        //     cout << coder::decode_reply_list_users( string_buffer ) << '\n';
-        // }
-        // else if( type == PRIVATE_MESSAGE ){
-        //     cout << coder::decode_reply_private_message( string_buffer ) << '\n';
-        // }
-    }
-    catch( const exception &e ){
-        cout << "Input error" << '\n';
-    }
+        try{
+            if( type == list_CR ){
+                
+                request_list req = request_list(list_CR);
+                string string_buffer = coder::encode_request_list( req );
+                send( *clientSocket, string_buffer.c_str(), string_buffer.size(), 0);
+                
+            }
+            else if( type == create_CR ){
 
+                chatroom_t newRoom = chatroom_t();
+                string roomName; cout << "Give Room Name: "; cin >> roomName;
+                newRoom.setName(roomName);
+                request_create_CR req = request_create_CR( newRoom );
+                string string_buffer = coder::encode_request_create_CR( req );            
+                send( *clientSocket, string_buffer.c_str(), string_buffer.size(), 0 );
+
+            }
+            else if( type == join_CR ){
+                int roomID;
+                cout << "Pick A Room To Join By ID Number: "; cin >> roomID;
+                request_JLD_CR req = request_JLD_CR( join_CR, roomID );
+                string string_buffer = coder::encode_request_JLD_CR( req );            
+                send( *clientSocket, string_buffer.c_str(), string_buffer.size(), 0 );
+                
+            }
+            else if( type == leave_CR ){
+                int roomID;
+                cout << "Pick A Room To Leave By ID: "; cin >> roomID;
+                request_JLD_CR req = request_JLD_CR( leave_CR, roomID );
+                string string_buffer = coder::encode_request_JLD_CR( req );            
+                send( *clientSocket, string_buffer.c_str(), string_buffer.size(), 0 );
+                
+            }
+            else if( type == delete_CR ){
+                int roomID;
+                cout << "Pick A Room To Delete By ID: "; cin >> roomID;
+                request_JLD_CR req = request_JLD_CR( leave_CR, roomID );
+                string string_buffer = coder::encode_request_JLD_CR( req );            
+                send( *clientSocket, string_buffer.c_str(), string_buffer.size(), 0 );
+            }
+            else if( type == BROADCAST_MESSAGE ){
+                string s; cout << "Enter MSG: "; cin >> s;
+                request_broadcast_message req = request_broadcast_message( req );
+                string string_buffer = coder::encode_request_broadcast_message( req ); 
+                cout << coder::decode_reply_broadcast_message( string_buffer ) << '\n';
+            }
+            // else if( type == list_users ){
+            //     cout << coder::decode_reply_list_users( string_buffer ) << '\n';
+            // }
+            // else if( type == PRIVATE_MESSAGE ){
+            //     cout << coder::decode_reply_private_message( string_buffer ) << '\n';
+            // }
+            else if( type == DISCONNECT ){
+                request_disconnect req = request_disconnect( DISCONNECT );
+                string string_buffer = coder::encode_request_disconnect( req );
+                send( *clientSocket, string_buffer.c_str(), string_buffer.size(), 0);
+            }
+        }
+        catch( const exception &e ){
+            cout << "Input error" << '\n';
+        }
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    }
     
  
 }
