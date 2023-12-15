@@ -444,6 +444,39 @@ void deleteRequest(request_JLD_CR req)
     send(req.getSocket(), string_buffer.c_str(), string_buffer.size(), 0);
 }
 
+
+
+// checked
+void privateMessageRequest(request_private_message req)
+{
+    reply_private_message rep;
+    rep.setRepType(PRIVATE_MESSAGE);
+    rep.setReplyId(req.getrequestId());
+    try
+    {
+        rep.setMessage(req.getMessage());
+        rep.setUserId(req.getuserId());
+        rep.setStatus(200);
+        rep.setServerMessage("Message delivered succesfully");
+    }
+    catch (const exception &e)
+    {
+        rep.setStatus(500);
+        rep.setServerMessage("Failed to transmit a private msg");
+    }
+    message_t tmp = rep.getMessage();
+    tmp.setSender( req.getFrom() );
+    rep.setMessage(tmp);
+    reply_private_message repSender(rep);
+    tmp = repSender.getMessage();
+    tmp.setContent("$tilowkey");
+    repSender.setMessage(tmp);
+    string string_buffer = coder::encode_reply_private_message(rep);
+    string string_buffer2 = coder::encode_reply_private_message(repSender);
+    send( nameToSocket[ req.getuserId() ], string_buffer.c_str(), string_buffer.size(), 0 );
+    send( req.getSocket(), string_buffer2.c_str(), string_buffer2.size(), 0 );
+}
+
 // checked
 void broadcastRequest(request_broadcast_message req)
 {
@@ -456,12 +489,16 @@ void broadcastRequest(request_broadcast_message req)
         {
             if (cr.getchatroomID() == req.getchatroomID())
             {
+                cout << "Found room";
                 for (id person : cr.getMembers())
                 {
+                    if( req.getFrom() == person ){
+                        cout << "HAHA" << '\n'; continue;
+                    }
                     request_private_message reqt;
                     reqt.setRequestId(req.getrequestId());
                     reqt.setReqType(PRIVATE_MESSAGE);
-                    reqt.setFrom(person);
+                    reqt.setFrom(req.getFrom());
                     reqt.setUserId(person);
                     reqt.setMessage(req.getMessage());
                     queueMutex.lock();
@@ -483,27 +520,7 @@ void broadcastRequest(request_broadcast_message req)
     send(req.getSocket(), string_buffer.c_str(), string_buffer.size(), 0);
 }
 
-// checked
-void privateMessageRequest(request_private_message req)
-{
-    reply_private_message rep;
-    rep.setRepType(PRIVATE_MESSAGE);
-    rep.setReplyId(req.getrequestId());
-    try
-    {
-        rep.setMessage(req.getMessage());
-        rep.setUserId(req.getuserId());
-        rep.setStatus(200);
-        rep.setServerMessage("Message delivered succesfully");
-    }
-    catch (const exception &e)
-    {
-        rep.setStatus(500);
-        rep.setServerMessage("Failed to transmit a private msg");
-    }
-    string string_buffer = coder::encode_reply_private_message(rep);
-    send(req.getSocket(), string_buffer.c_str(), string_buffer.size(), 0);
-}
+
 
 void listUsersRequest(request_list req)
 {
@@ -602,6 +619,10 @@ void *workingThread(void *index)
         {
             request_broadcast_message *reqn = (request_broadcast_message *)req;
             broadcastRequest(*reqn);
+        }
+        else if ( req->getreqType() == PRIVATE_MESSAGE ){
+            request_private_message *reqn = (request_private_message *) req;
+            privateMessageRequest(*reqn);
         }
         else if (req->getreqType() == list_users)
         {
