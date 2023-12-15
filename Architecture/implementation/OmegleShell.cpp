@@ -193,7 +193,9 @@ void TaskHandler::handle_connect(OmegleShell &shell)
          << req;
     // encode request_connect()
     string encoding = coder::encode_request_connect(req);
+
     // send encoding to server
+    shell.getClient().send_over_socket(encoding);
     // // client.send(encoding);
 
     // store the request inside the set.
@@ -201,7 +203,8 @@ void TaskHandler::handle_connect(OmegleShell &shell)
     // wait to receive request from the server
     // // recv function
     // wait at most 2 seconds for the server to respond.
-
+    string CONTENT = shell.getClient().receive_from_socket();
+    cout << CONTENT << '\n';
     // Receive reply :
     // To-Add
     string encoding_reply = "";

@@ -46,10 +46,18 @@ void Client::setSocketfd(int socketfd_) { socketfd = socketfd_; }
 
 void Client::send_over_socket(string message)
 {
-
-    send();
+    // string S = "OKAY";
+    send(getSocketfd(), message.c_str(), message.size(), 0);
 }
-string Client::receive_from_socket() {}
+string Client::receive_from_socket()
+{
+    char *buffer;
+    int valread = read(getSocketfd(), buffer, sizeof(buffer));
+    if (valread == 0)
+        cout << "[client] : Error reading from socket\n";
+    string string_buffer = (string)buffer;
+    return string_buffer;
+}
 
 /*
 string string_buffer = coder::encode_request_disconnect( req ); //corresponding encoding
