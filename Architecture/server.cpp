@@ -493,28 +493,37 @@ void broadcastRequest(request_broadcast_message req)
         for (chatroom_t cr : CR)
         {
             if (cr.getchatroomID() == req.getchatroomID())
-            {
-                cout << "Found room";
-                for (id person : cr.getMembers())
-                {
-                    cout << "c\n";
-                    if( req.getFrom() == person ){
-                        cout << "HAHA" << '\n'; continue;
-                    }
-                    request_private_message * reqt = new request_private_message();
-                    reqt->setRequestId(req.getrequestId());
-                    reqt->setReqType(PRIVATE_MESSAGE);
-                    reqt->setFrom(req.getFrom());
-                    reqt->setUserId(person);
-                    reqt->setMessage(req.getMessage());
-                    queueMutex.lock();
-                    q.push( reqt );
-                    queueMutex.unlock();
-                    sem_post(&work);
+            {   
+                bool find = false;
+                for(id member: cr.getMembers()){
+                    if( req.getFrom() == member ) find = true;
                 }
-                rep.setServerMessage("Send Succesfully ");
-                rep.setStatus(200);
-                break;
+                if(find){
+                    for (id person : cr.getMembers())
+                    {
+                        cout << "c\n";
+                        if( req.getFrom() == person ){
+                            cout << "HAHA" << '\n'; continue;
+                        }
+                        request_private_message * reqt = new request_private_message();
+                        reqt->setRequestId(req.getrequestId());
+                        reqt->setReqType(PRIVATE_MESSAGE);
+                        reqt->setFrom(req.getFrom());
+                        reqt->setUserId(person);
+                        reqt->setMessage(req.getMessage());
+                        queueMutex.lock();
+                        q.push( reqt );
+                        queueMutex.unlock();
+                        sem_post(&work);
+                    }
+                    rep.setServerMessage("Send Succesfully ");
+                    rep.setStatus(200);
+                    break;
+                }
+                else{
+                    rep.setServerMessage("You Are Not In The Specified Room");
+                    rep.setStatus(200);
+                }
             }
         }
     }

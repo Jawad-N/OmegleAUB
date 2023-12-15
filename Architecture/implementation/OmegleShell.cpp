@@ -495,3 +495,9 @@ void TaskHandler::handle_disconnect(OmegleShell &shell)
 }
 void TaskHandler::handle_display_chatroom_message_history(OmegleShell &shell) { cout << "handle display chatroom message history\n"; }
 // // // // // // Task Handler end // // // // // // //
+
+
+
+void TaskHandler::handle_create_chatroom(OmegleShell &shell){
+    
+}
