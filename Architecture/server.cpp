@@ -261,17 +261,17 @@ void joinRequest(request_JLD_CR req)
     {
         bool flag = false;
 
-        for (chatroom_t cr : CR)
+        for (auto it = CR.begin(); it != CR.end(); ++it)
         {
+            chatroom_t cr = *it;
             if (cr.getchatroomID() == req.getchatroomID())
             {   
-                cout << "Pending is: " << req.getFrom() << '\n';
-                cout << "MEMBERS OF CR: ";
+                bool find = false;
                 for(id name: cr.getMembers()){
-                    cout << name << ' ';
+                    if(name == req.getFrom()) find = true;
                 }
                 cout << '\n';
-                if( cr.getMembers().find( req.getFrom() ) != cr.getMembers().end() ){
+                if( find ){
                     rep.setServerMessage("You Are Already In That Room");
                 }
                 else{
@@ -279,11 +279,13 @@ void joinRequest(request_JLD_CR req)
                     set<id> tempSet = cr.getMembers();
                     tempSet.insert( req.getFrom() );
                     cr.setMembers(tempSet);
-                    
+                    CR.erase(it);
+                    CR.insert(cr);
                 }
                 flag = true;
                 break;
             }
+
         }
 
         if (!flag)
@@ -313,32 +315,37 @@ void leaveRequest(request_JLD_CR req)
     try
     {
         bool flag = false;
-        for(int i = 0; i < CR.size(); )
         for (auto it = CR.begin(); it != CR.end(); ++it){
             chatroom_t cr = *it;
             if (cr.getchatroomID() == req.getchatroomID())
             {   
-                if( cr.getMembers().find( req.getFrom() ) != cr.getMembers().end() ){
+                bool find = false;
+                cout << "\nRoom Members before leave: ";
+                for(id member: cr.getMembers()){
+                    if ( member == req.getFrom() ) find = true;
+                    cout << member << ' ';
+                }
+                cout << '\n';
+                cout << "Person that wants to leave: " << req.getFrom() <<'\n';
+                if( find ){
                     set<id> tempSet = cr.getMembers();
-                    cout << "tempsets:" <<'\n';
-                    for( id si: tempSet ) cout << si << ' ';
-                    cout << '\n';
                     tempSet.erase( req.getFrom() );
-                    for( id si: tempSet ) cout << si << ' ';
-                    cout << '\n';
-                    cr.setMembers( tempSet );
+                    cr.setMembers(tempSet);
                     string temp = "Left Room " + cr.getName();
                     rep.setServerMessage( temp );
                     rep.setStatus(200);
+                    it = CR.erase(it);
+                    CR.insert(cr);
                 }
                 else{
                     rep.setServerMessage("Not In That Room To Begin With");
                     rep.setStatus(200);
                 }
+                
                 flag = true;
+                break;
             }
-            it = CR.erase(it);
-            CR.insert(cr);
+            
         }
         if (!flag){
             rep.setServerMessage("ChatRoom Does Not Exist");
@@ -403,10 +410,10 @@ void deleteRequest(request_JLD_CR req)
                     rep.setStatus(200);
                 }
                 rep.setChatroomId(req.getchatroomID());
+                flag = true;
                 break;
             }
-            it = CR.erase(it);
-            CR.insert(cr);
+            
         }
         if (!flag)
         {
@@ -497,7 +504,7 @@ void listUsersRequest(request_list req)
         {
             for (id person : cr.getMembers())
             {
-                S.insert(person);
+                S.insert(person); // set to avoid repititions, since a user may be in multiple chatrooms
             }
         }
         for (id person : S)
@@ -506,6 +513,8 @@ void listUsersRequest(request_list req)
         }
         sort(users.begin(), users.end()); // return the list alphabetically
         rep.setUsers(users);
+        cout << "USERS: ";
+        for( id user: users ) cout << user << ' '; cout << '\n';
         rep.setServerMessage("List Sent Succesfully");
         rep.setStatus(200);
     }
@@ -638,17 +647,18 @@ int main()
     while (true)
     {
 
-        int incoming;
+        int incoming[1024];
         // Taking in requests, if one arrives before accept then it queues up and accept does not block
         // Otherwise accept blocks and waits until a connect request occurs
-        if ((incoming = accept(serverSocket, (struct sockaddr *)&serverAddress, &addrlen)) < 0)
+        if ((incoming[userCounter] = accept(serverSocket, (struct sockaddr *)&serverAddress, &addrlen)) < 0)
         {
             // handling potential error
             perror(" accept failed ");
             exit(EXIT_FAILURE);
         }
-
-        int err = pthread_create(&threads[userCounter++], NULL, listeningThread, &incoming);
+        
+        int err = pthread_create(&threads[userCounter], NULL, listeningThread, &incoming[userCounter]);
+        userCounter++;
         if (err != 0)
             cout << " something is wrong " << '\n';
 
