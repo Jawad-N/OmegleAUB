@@ -62,7 +62,7 @@ ostream &operator<<(ostream &os, const request &req)
 
 // request_connect_start
 
-request_connect::request_connect(string user_name) : request(connect_USR)
+request_connect::request_connect(string user_name) : request(connect_CR)
 {
     setUserName(user_name);
 }
@@ -73,11 +73,15 @@ request_connect::request_connect() : request()
 
 request_connect::request_connect(const request &other) : request(other)
 {
+    if (other.getreqType() != connect_CR )
+        throw runtime_error("[server] : Error creating request_connect from request constructor. reqtype incompatible");
     setUserName("");
 }
 
 request_connect::request_connect(const request_connect &other) : request(other)
 {
+    if (other.getreqType() != connect_CR )
+        throw runtime_error("[server] : Error creating request_connect from request constructor. reqtype incompatible");
     setUserName(other.getuserName());
 }
 
